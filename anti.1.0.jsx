@@ -226,7 +226,7 @@ const ERROR_PATTERNS = [
 
 // ============================================================
 // LİNKEDİN & BUFFER PROXY AYARLARI
-// Chrome Private Network Access (PNA) koruması: HTTPS ortamında localhost araması engellenir
+// linkedin_server.py sunucusu HTTP (3000) ve HTTPS (3001) portlarında otomatik algılanır
 // ============================================================
 const isLocalhostAllowed = () => {
   if (typeof window === 'undefined') return false;
@@ -238,27 +238,50 @@ const isLocalhostAllowed = () => {
 let _linkedInServerUrl = '';
 const getLinkedInServerUrl = async () => {
   if (_linkedInServerUrl) return _linkedInServerUrl;
-  if (!isLocalhostAllowed()) return '';
 
-  // 1. Localhost 3000 dene
-  try {
-    const r = await fetch('http://localhost:3000/', { signal: AbortSignal.timeout(1000) });
-    if (r.ok) {
-      _linkedInServerUrl = 'http://localhost:3000';
-      addSystemLog('✓ LinkedIn yerel sunucu bulundu: localhost:3000', 'success');
-      return _linkedInServerUrl;
-    }
-  } catch(e) {}
+  const isHttps = typeof window !== 'undefined' && window.location.protocol === 'https:';
 
-  // 2. 127.0.0.1 dene
-  try {
-    const r = await fetch('http://127.0.0.1:3000/', { signal: AbortSignal.timeout(1000) });
-    if (r.ok) {
-      _linkedInServerUrl = 'http://127.0.0.1:3000';
-      addSystemLog('✓ LinkedIn yerel sunucu bulundu: 127.0.0.1:3000', 'success');
-      return _linkedInServerUrl;
-    }
-  } catch(e) {}
+  if (isHttps) {
+    // 1. HTTPS Port 3001 dene (linkedin_server.py HTTPS desteği — mixed content engelsiz)
+    try {
+      const r = await fetch('https://localhost:3001/', { signal: AbortSignal.timeout(1200) });
+      if (r.ok) {
+        _linkedInServerUrl = 'https://localhost:3001';
+        addSystemLog('✓ LinkedIn & Buffer HTTPS sunucusu bağlandı: https://localhost:3001', 'success');
+        return _linkedInServerUrl;
+      }
+    } catch(e) {}
+
+    try {
+      const r = await fetch('https://127.0.0.1:3001/', { signal: AbortSignal.timeout(1200) });
+      if (r.ok) {
+        _linkedInServerUrl = 'https://127.0.0.1:3001';
+        addSystemLog('✓ LinkedIn & Buffer HTTPS sunucusu bağlandı: https://127.0.0.1:3001', 'success');
+        return _linkedInServerUrl;
+      }
+    } catch(e) {}
+  }
+
+  // 2. HTTP Port 3000 dene
+  if (isLocalhostAllowed()) {
+    try {
+      const r = await fetch('http://localhost:3000/', { signal: AbortSignal.timeout(1200) });
+      if (r.ok) {
+        _linkedInServerUrl = 'http://localhost:3000';
+        addSystemLog('✓ LinkedIn yerel sunucu bulundu: http://localhost:3000', 'success');
+        return _linkedInServerUrl;
+      }
+    } catch(e) {}
+
+    try {
+      const r = await fetch('http://127.0.0.1:3000/', { signal: AbortSignal.timeout(1200) });
+      if (r.ok) {
+        _linkedInServerUrl = 'http://127.0.0.1:3000';
+        addSystemLog('✓ LinkedIn yerel sunucu bulundu: http://127.0.0.1:3000', 'success');
+        return _linkedInServerUrl;
+      }
+    } catch(e) {}
+  }
 
   return '';
 };
@@ -4344,6 +4367,7 @@ class ErrorBoundary extends React.Component {
                   const payloadStr = JSON.stringify(payload);
 
                   const tryEndpoints = [
+                    ...(serverUrl ? [{ url: `${serverUrl}/buffer_proxy`, isLocal: true }] : []),
                     ...(isLocalhostAllowed() ? [{ url: 'http://localhost:3000/buffer_proxy', isLocal: true }] : []),
                     { url: targetUrl, isDirect: true },
                     { url: `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`, isProxy: true },
