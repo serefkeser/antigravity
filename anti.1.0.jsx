@@ -901,11 +901,31 @@ const _getLangInstruction = (lang) => {
   return `BÜTÜN SENARYOYU ${map[lang] || 'TÜRKÇE'} YAZACAKSIN.`;
 };
 
-// === ORTAK TIMER WORKER HELPER ===
+// === ORTAK TIMER WORKER HELPER (CSP Fallback Korumalı) ===
 const _createTimerWorker = () => {
   const frameInterval = 1000 / 30; // 33.33ms = 30fps exact
-  const code = `let interval; self.onmessage = function(e) { if (e.data === 'start') interval = setInterval(() => self.postMessage('tick'), ${frameInterval}); if (e.data === 'stop') clearInterval(interval); };`;
-  return new Worker(ObjectURLManager.create(new Blob([code], { type: 'application/javascript' })));
+  try {
+    const code = `let interval; self.onmessage = function(e) { if (e.data === 'start') interval = setInterval(() => self.postMessage('tick'), ${frameInterval}); if (e.data === 'stop') clearInterval(interval); };`;
+    const blob = new Blob([code], { type: 'application/javascript' });
+    const blobUrl = ObjectURLManager.create(blob);
+    return new Worker(blobUrl);
+  } catch (e) {
+    // CSP Fallback: Web Worker engellendiyse main thread interval kullan
+    console.warn('[OTONOM] Web Worker CSP engeli, main-thread timer yedek devreye girdi:', e?.message || e);
+    let interval;
+    const dummyWorker = {
+      onmessage: null,
+      postMessage(msg) {
+        if (msg === 'start') {
+          interval = setInterval(() => { if (this.onmessage) this.onmessage({ data: 'tick' }); }, frameInterval);
+        } else if (msg === 'stop') {
+          clearInterval(interval);
+        }
+      },
+      terminate() { clearInterval(interval); }
+    };
+    return dummyWorker;
+  }
 };
 
 // === ORTAK SILENT OSCILLATOR HELPER (MediaRecorder canlı tutmak için) ===
