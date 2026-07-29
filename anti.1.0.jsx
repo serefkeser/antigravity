@@ -3388,30 +3388,53 @@ class MediaSynthesisService {
                         const basliklarList = allBasliklar.slice(0, 10).map(b => b.baslik).join('. '); // Max 10 başlık
                         const ozetSpoken = `${sourceLabel} başlıklarında bugün ${allBasliklar.length} önemli başlık var. ${basliklarList}.`;
 
-                        // Her başlık için 2 sahne ekle: 1. sabit görsel + başlık, 2. AI görsel + açıklama
+                        const isGazeteMode = Boolean(
+                          this.state.config?.tip === 'gazete' ||
+                          this.state.script?._isGazete ||
+                          this.state.config?.isGazete ||
+                          (queue.length > 0 && (this.state.config?.sourceName || this.state.config?.gazeteSource))
+                        );
+
+                        // Her başlık için sahne ekle: Gazete modunda SADECE gazete resmi ve anlatım (AI görsel YOK)
                         allBasliklar.forEach((baslik, idx) => {
                             const imgIdx = baslik._imgIdx != null ? baslik._imgIdx : 0;
                             const srcItem = queue[imgIdx] || queue[0];
                             const srcImg = (typeof srcItem?.data === "string" ? srcItem?.data : null) || (typeof srcItem?.customImage === "string" ? srcItem?.customImage : null);
-                            // AI görsel prompt — açıklamadan İngilizce görsel komutu üret
-                            const aiPrompt = baslik.aciklama ? baslik.aciklama.substring(0, 200) : (baslik.baslik || "News event");
-                            this.state.script.imageBlocks.push({
-                                imageIndex: imgIdx,
-                                imageType: 'custom',
-                                customImage: srcImg,
-                                videoSlides: [
-                                  {
-                                    topText: baslik.baslik.toUpperCase(),
-                                    spokenText: `${baslik.baslik}.`,
-                                    imagePrompts: [],
-                                  },
-                                  {
-                                    topText: '',
-                                    spokenText: baslik.aciklama || baslik.baslik,
-                                    imagePrompts: [aiPrompt],
-                                  }
-                                ]
-                              });
+                            
+                            if (isGazeteMode) {
+                              // Gazete ilk sayfası modu: Sadece gazete resmi + anlatım
+                              this.state.script.imageBlocks.push({
+                                  imageIndex: imgIdx,
+                                  imageType: 'custom',
+                                  customImage: srcImg,
+                                  videoSlides: [
+                                    {
+                                      topText: baslik.baslik.toUpperCase(),
+                                      spokenText: `${baslik.baslik}. ${baslik.aciklama || ''}`.trim(),
+                                      imagePrompts: [],
+                                    }
+                                  ]
+                                });
+                            } else {
+                              const aiPrompt = baslik.aciklama ? baslik.aciklama.substring(0, 200) : (baslik.baslik || "News event");
+                              this.state.script.imageBlocks.push({
+                                  imageIndex: imgIdx,
+                                  imageType: 'custom',
+                                  customImage: srcImg,
+                                  videoSlides: [
+                                    {
+                                      topText: baslik.baslik.toUpperCase(),
+                                      spokenText: `${baslik.baslik}.`,
+                                      imagePrompts: [],
+                                    },
+                                    {
+                                      topText: '',
+                                      spokenText: baslik.aciklama || baslik.baslik,
+                                      imagePrompts: [aiPrompt],
+                                    }
+                                  ]
+                                });
+                            }
                           });
 
                         addSystemLog(`BAŞLIKLAR sayfası oluşturuldu: ${allBasliklar.length} başlık.`, 'success');
@@ -3530,24 +3553,43 @@ class MediaSynthesisService {
 
                       await this.updateProgress(70, 'Güzel söz hazır...', 'ASSETS');
                     } else {
-                      if (!this.state.assets.thumbnail) { addSystemLog('Kapak resmi çizimi...', 'info'); this.state.assets.thumbnail = await MediaSynthesisService.generateImage(this.state.script.thumbnailImagePrompt || "Dramatic news event", imgStyle, imgRes); addSystemLog('Kapak resmi tamamlandı.', 'success'); }
-
                       const customImages = this.state.config.customSceneImages || [];
                       this.state.customImageCount = customImages.length;
+                      const isGazeteInput = Boolean(
+                        this.state.config?.tip === 'gazete' ||
+                        this.state.script?._isGazete ||
+                        this.state.config?.isGazete ||
+                        (customImages.length > 0 && (this.state.config?.sourceName || this.state.config?.gazeteSource))
+                      );
+
+                      if (isGazeteInput && customImages.length > 0) {
+                        const mainGazeteImage = customImages[0];
+                        this.state.assets.thumbnail = mainGazeteImage;
+                        addSystemLog('📰 GAZETE İLK SAYFASI MODU: Tüm sahnelerde gazete resmi kullanılıyor. AI Görsel üretimi ATLANDI.', 'info');
+                        for (let i = 0; i < this.state.script.videoSlides.length; i++) {
+                          this.state.assets.images[i] = mainGazeteImage;
+                        }
+                      } else if (!this.state.assets.thumbnail) {
+                        addSystemLog('Kapak resmi çizimi...', 'info');
+                        this.state.assets.thumbnail = await MediaSynthesisService.generateImage(this.state.script.thumbnailImagePrompt || "Dramatic news event", imgStyle, imgRes);
+                        addSystemLog('Kapak resmi tamamlandı.', 'success');
+                      }
 
                       // Sabit görsel SADECE bloğun 1. sahnesine atanır (S1 gösterimi)
                       // 2. ve 3. sahneler AI tarafından üretilir (M1'i anlatan görseller)
-                      const blocks = this.state.script.imageBlocks || [];
-                      let globalIdx = 0;
-                      for (let b = 0; b < blocks.length; b++) {
-                        const block = blocks[b];
-                        const blockSlideCount = block.videoSlides.length;
-                        const blockCustomImg = block.customImage || customImages[b];
-                        if (block.imageType === 'custom' && blockCustomImg) {
-                          this.state.assets.images[globalIdx] = blockCustomImg;
-                          addSystemLog(`Blok ${b + 1}: Sabit görsel 1. sahneye atandı. Kalan ${blockSlideCount - 1} sahne AI üretilecek.`, 'info');
+                      if (!isGazeteInput) {
+                        const blocks = this.state.script.imageBlocks || [];
+                        let globalIdx = 0;
+                        for (let b = 0; b < blocks.length; b++) {
+                          const block = blocks[b];
+                          const blockSlideCount = block.videoSlides.length;
+                          const blockCustomImg = block.customImage || customImages[b];
+                          if (block.imageType === 'custom' && blockCustomImg) {
+                            this.state.assets.images[globalIdx] = blockCustomImg;
+                            addSystemLog(`Blok ${b + 1}: Sabit görsel 1. sahneye atandı. Kalan ${blockSlideCount - 1} sahne AI üretilecek.`, 'info');
+                          }
+                          globalIdx += blockSlideCount;
                         }
-                        globalIdx += blockSlideCount;
                       }
 
                       const CHUNK_SIZE = 3;
