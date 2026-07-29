@@ -4337,6 +4337,45 @@ class ErrorBoundary extends React.Component {
                   addSystemLog('ℹ️ [PAYLAŞ ADIM 3] Yerel sunucu pasif/erişilemez, doğrudan Buffer API deneniyor...', 'info');
                 }
 
+                // Buffer GraphQL sorguları için CORS-Proxy destekli akıllı istek fonksiyonu
+                const fetchBufferGraphQL = async (queryStr, variablesObj = {}) => {
+                  const targetUrl = 'https://api.buffer.com/graphql';
+                  const payload = { query: queryStr, variables: variablesObj, token };
+                  const payloadStr = JSON.stringify(payload);
+
+                  const tryEndpoints = [
+                    ...(isLocalhostAllowed() ? [{ url: 'http://localhost:3000/buffer_proxy', isLocal: true }] : []),
+                    { url: targetUrl, isDirect: true },
+                    { url: `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`, isProxy: true },
+                    { url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`, isProxy: true }
+                  ];
+
+                  let lastErr = null;
+                  for (const ep of tryEndpoints) {
+                    try {
+                      const headers = { 'Content-Type': 'application/json' };
+                      if (token) headers['Authorization'] = `Bearer ${token}`;
+                      if (ep.isLocal) headers['X-Local-Proxy-Auth'] = 'otonom_proxy_secret_key_883921';
+
+                      const res = await fetch(ep.url, {
+                        method: 'POST',
+                        headers,
+                        body: payloadStr
+                      });
+
+                      if (res.ok) {
+                        const json = await res.json();
+                        if (json.data || json.errors) return json;
+                      } else {
+                        lastErr = new Error(`HTTP ${res.status}`);
+                      }
+                    } catch(e) {
+                      lastErr = e;
+                    }
+                  }
+                  throw lastErr || new Error('Buffer API bağlantı hatası');
+                };
+
                 let activeChannels = [];
                 try {
                   const getChannelsQuery = `
@@ -4348,35 +4387,12 @@ class ErrorBoundary extends React.Component {
                       }
                     }
                   `;
-                  let orgId = null;
-                  for (const ep of endpoints) {
-                    try {
-                      addSystemLog(`ℹ️ [PAYLAŞ ADIM 4] Buffer Organization sorgulanıyor: ${ep}`, 'info');
-                      const res = await fetch(ep, {
-                        method: 'POST',
-                        headers: { 
-                          'Content-Type': 'application/json', 
-                          'Authorization': `Bearer ${token}`,
-                          'X-Local-Proxy-Auth': 'otonom_proxy_secret_key_883921'
-                        },
-                        body: JSON.stringify({ query: getChannelsQuery, token, variables: {} })
-                      });
-                      if (res.ok) {
-                        const json = await res.json();
-                        orgId = json.data?.account?.organizations?.[0]?.id;
-                        if (orgId) {
-                          addSystemLog(`✓ [PAYLAŞ ADIM 4] Buffer Organization ID bulundu: ${orgId}`, 'success');
-                          break;
-                        }
-                      } else {
-                        addSystemLog(`⚠️ [PAYLAŞ ADIM 4] Organization isteği HTTP ${res.status} döndü`, 'warn');
-                      }
-                    } catch(e) {
-                      addSystemLog(`⚠️ [PAYLAŞ ADIM 4] Organization proxy deneme hatası (${ep}): ${e.message}`, 'warn');
-                    }
-                  }
+                  addSystemLog('ℹ️ [PAYLAŞ ADIM 4] Buffer Organization sorgulanıyor...', 'info');
+                  const jsonOrg = await fetchBufferGraphQL(getChannelsQuery);
+                  const orgId = jsonOrg.data?.account?.organizations?.[0]?.id;
 
                   if (orgId) {
+                    addSystemLog(`✓ [PAYLAŞ ADIM 4] Buffer Organization ID bulundu: ${orgId}`, 'success');
                     const chanQuery = `
                       query GetChannels($input: ChannelsInput!) {
                         channels(input: $input) {
@@ -4386,30 +4402,14 @@ class ErrorBoundary extends React.Component {
                         }
                       }
                     `;
-                    for (const ep of endpoints) {
-                      try {
-                        const res = await fetch(ep, {
-                          method: 'POST',
-                          headers: { 
-                            'Content-Type': 'application/json', 
-                            'Authorization': `Bearer ${token}`,
-                            'X-Local-Proxy-Auth': 'otonom_proxy_secret_key_883921'
-                          },
-                          body: JSON.stringify({ query: chanQuery, token, variables: { input: { organizationId: orgId } } })
-                        });
-                        if (res.ok) {
-                          const json = await res.json();
-                          if (Array.isArray(json.data?.channels) && json.data.channels.length > 0) {
-                            activeChannels = json.data.channels;
-                            addSystemLog(`✓ [PAYLAŞ ADIM 4] Dinamik kanal listesi alındı (${activeChannels.length} kanal)`, 'success');
-                            break;
-                          }
-                        }
-                      } catch(e) {}
+                    const jsonChan = await fetchBufferGraphQL(chanQuery, { input: { organizationId: orgId } });
+                    if (Array.isArray(jsonChan.data?.channels) && jsonChan.data.channels.length > 0) {
+                      activeChannels = jsonChan.data.channels;
+                      addSystemLog(`✓ [PAYLAŞ ADIM 4] Dinamik kanal listesi alındı (${activeChannels.length} kanal)`, 'success');
                     }
                   }
                 } catch(e) {
-                  addSystemLog(`⚠️ [PAYLAŞ ADIM 4] Kanal listesi sorgu hatası: ${e.message}`, 'warn');
+                  addSystemLog(`⚠️ [PAYLAŞ ADIM 4] Dinamik kanal sorgu uyarısı: ${e.message}`, 'warn');
                 }
 
                 // Dinamik çekilemediyse varsayılan kanal listesini kullan (TikTok dahil)
@@ -4466,40 +4466,22 @@ class ErrorBoundary extends React.Component {
                     };
                   }
 
-                  let posted = false;
                   addSystemLog(`⏳ [KANAL GÖNDERİMİ] ${ch.name} (${ch.service.toUpperCase()}) kanalına gönderiliyor...`, 'info');
-                  for (const ep of endpoints) {
-                    if (posted) break;
-                    try {
-                      const res = await fetch(ep, {
-                        method: 'POST',
-                        headers: {
-                          'Content-Type': 'application/json',
-                          'Authorization': `Bearer ${token}`,
-                          'X-Local-Proxy-Auth': 'otonom_proxy_secret_key_883921'
-                        },
-                        body: JSON.stringify({ query: mutation, token, variables })
-                      });
-                      if (res.ok) {
-                        const json = await res.json();
-                        const postData = json.data?.createPost;
-                        if (postData?.post?.id) {
-                          posted = true;
-                          successCount++;
-                          addSystemLog(`✓ [BAŞARILI] ${ch.name} (${ch.service.toUpperCase()}): Post ID=${postData.post.id}, Status=${postData.post.status}`, 'success');
-                        } else if (postData?.message) {
-                          addSystemLog(`⚠️ [KANAL UYARISI] ${ch.name} (${ch.service.toUpperCase()}): ${postData.message}`, 'warn');
-                        } else if (json.errors && json.errors.length > 0) {
-                          addSystemLog(`❌ [GRAPHQL HATASI] ${ch.name}: ${json.errors.map(e => e.message).join(', ')}`, 'error');
-                        } else {
-                          addSystemLog(`⚠️ [BİLİNMEYEN YANIT] ${ch.name}: ${JSON.stringify(json)}`, 'warn');
-                        }
-                      } else {
-                        addSystemLog(`❌ [HTTP HATASI] ${ch.name} (${ep}): Status HTTP ${res.status}`, 'error');
-                      }
-                    } catch(e) {
-                      addSystemLog(`❌ [BAĞLANTI HATASI] ${ch.name} (${ep}): ${e.message}`, 'error');
+                  try {
+                    const json = await fetchBufferGraphQL(mutation, variables);
+                    const postData = json.data?.createPost;
+                    if (postData?.post?.id) {
+                      successCount++;
+                      addSystemLog(`✓ [BAŞARILI] ${ch.name} (${ch.service.toUpperCase()}): Post ID=${postData.post.id}, Status=${postData.post.status}`, 'success');
+                    } else if (postData?.message) {
+                      addSystemLog(`⚠️ [KANAL UYARISI] ${ch.name} (${ch.service.toUpperCase()}): ${postData.message}`, 'warn');
+                    } else if (json.errors && json.errors.length > 0) {
+                      addSystemLog(`❌ [GRAPHQL HATASI] ${ch.name}: ${json.errors.map(e => e.message).join(', ')}`, 'error');
+                    } else {
+                      addSystemLog(`⚠️ [BİLİNMEYEN YANIT] ${ch.name}: ${JSON.stringify(json)}`, 'warn');
                     }
+                  } catch(e) {
+                    addSystemLog(`❌ [BAĞLANTI HATASI] ${ch.name}: ${e.message}`, 'error');
                   }
                 }
                 return successCount;
