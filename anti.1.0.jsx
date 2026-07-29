@@ -4308,12 +4308,13 @@ class ErrorBoundary extends React.Component {
                 }
 
                 const isVideoAsset = isVideo && Boolean(directCloudUrl);
+                addSystemLog(`ℹ️ [PAYLAŞ ADIM 2] Yayın Tipi: ${isVideoAsset ? 'MP4 Video' : 'Görsel'}, Medya Linki: ${directCloudUrl || 'Yok (Metin Postu)'}`, 'info');
 
                 // 3. Sunucu destekli tek tıkla otomatik paylaşım (CORS/PNA engellerini aşar)
                 const serverUrl = await getLinkedInServerUrl();
                 if (serverUrl) {
                   try {
-                    addSystemLog('ℹ️ Yerel sunucu üzerinden Buffer paylaşımı başlatılıyor...', 'info');
+                    addSystemLog(`ℹ️ [PAYLAŞ ADIM 3] Yerel sunucu bulundu (${serverUrl}), toplu paylaşım isteği gönderiliyor...`, 'info');
                     const res = await fetch(`${serverUrl}/buffer/share-all`, {
                       method: 'POST',
                       headers: {
@@ -4329,14 +4330,21 @@ class ErrorBoundary extends React.Component {
                     if (res.ok) {
                       const json = await res.json();
                       if (json.status === 'success') {
-                        addSystemLog(`✓ Buffer üzerinden ${json.channels_count || 3} sosyal medya kanalına başarıyla gönderildi!`, 'success');
-                        return true;
+                        addSystemLog(`✓ [PAYLAŞ BAŞARILI] Buffer yerel sunucu köprüsü ile ${json.channels_count || 3} sosyal medya kanalına gönderildi!`, 'success');
+                        return json.channels_count || 3;
+                      } else {
+                        addSystemLog(`⚠️ [PAYLAŞ UYARI] Sunucu yanıtı: ${json.message || JSON.stringify(json)}`, 'warn');
                       }
+                    } else {
+                      addSystemLog(`❌ [PAYLAŞ SUNUCU HATASI] Status: HTTP ${res.status} (${res.statusText})`, 'error');
                     }
                   } catch(e) {
-                    console.warn('Yerel sunucu Buffer paylaşım uyarısı:', e.message);
+                    addSystemLog(`⚠️ [PAYLAŞ SUNUCU UYARISI] Yerel sunucu köprüsü hatası: ${e.message}`, 'warn');
                   }
+                } else {
+                  addSystemLog('ℹ️ [PAYLAŞ ADIM 3] Yerel sunucu pasif/erişilemez, doğrudan Buffer API deneniyor...', 'info');
                 }
+
                 let activeChannels = [];
                 try {
                   const getChannelsQuery = `
@@ -4351,6 +4359,7 @@ class ErrorBoundary extends React.Component {
                   let orgId = null;
                   for (const ep of endpoints) {
                     try {
+                      addSystemLog(`ℹ️ [PAYLAŞ ADIM 4] Buffer Organization sorgulanıyor: ${ep}`, 'info');
                       const res = await fetch(ep, {
                         method: 'POST',
                         headers: { 
@@ -4363,9 +4372,16 @@ class ErrorBoundary extends React.Component {
                       if (res.ok) {
                         const json = await res.json();
                         orgId = json.data?.account?.organizations?.[0]?.id;
-                        if (orgId) break;
+                        if (orgId) {
+                          addSystemLog(`✓ [PAYLAŞ ADIM 4] Buffer Organization ID bulundu: ${orgId}`, 'success');
+                          break;
+                        }
+                      } else {
+                        addSystemLog(`⚠️ [PAYLAŞ ADIM 4] Organization isteği HTTP ${res.status} döndü`, 'warn');
                       }
-                    } catch(e) {}
+                    } catch(e) {
+                      addSystemLog(`⚠️ [PAYLAŞ ADIM 4] Organization proxy deneme hatası (${ep}): ${e.message}`, 'warn');
+                    }
                   }
 
                   if (orgId) {
@@ -4393,13 +4409,16 @@ class ErrorBoundary extends React.Component {
                           const json = await res.json();
                           if (Array.isArray(json.data?.channels) && json.data.channels.length > 0) {
                             activeChannels = json.data.channels;
+                            addSystemLog(`✓ [PAYLAŞ ADIM 4] Dinamik kanal listesi alındı (${activeChannels.length} kanal)`, 'success');
                             break;
                           }
                         }
                       } catch(e) {}
                     }
                   }
-                } catch(e) {}
+                } catch(e) {
+                  addSystemLog(`⚠️ [PAYLAŞ ADIM 4] Kanal listesi sorgu hatası: ${e.message}`, 'warn');
+                }
 
                 // Dinamik çekilemediyse varsayılan kanal listesini kullan (TikTok dahil)
                 if (activeChannels.length === 0) {
@@ -4408,9 +4427,10 @@ class ErrorBoundary extends React.Component {
                     { id: '69f5d9145c4c051afa01c2f7', name: 'Instagram (keser4881)', service: 'instagram' },
                     { id: '6a69a6cf0dc384370e2ef6ea', name: 'TikTok', service: 'tiktok' }
                   ];
+                  addSystemLog(`ℹ️ [PAYLAŞ ADIM 4] Varsayılan kanal profili kullanılıyor (${activeChannels.length} kanal)`, 'info');
                 }
 
-                addSystemLog(`Buffer'a bağlı ${activeChannels.length} sosyal medya kanalı bulundu (${activeChannels.map(c => c.name).join(', ')}).`, 'info');
+                addSystemLog(`📌 [PAYLAŞ ADIM 5] Toplam ${activeChannels.length} kanal için yayın gönderimi başlatılıyor: ${activeChannels.map(c => `${c.name} (${c.service})`).join(', ')}`, 'info');
 
                 let successCount = 0;
                 for (const ch of activeChannels) {
@@ -4455,6 +4475,7 @@ class ErrorBoundary extends React.Component {
                   }
 
                   let posted = false;
+                  addSystemLog(`⏳ [KANAL GÖNDERİMİ] ${ch.name} (${ch.service.toUpperCase()}) kanalına gönderiliyor...`, 'info');
                   for (const ep of endpoints) {
                     if (posted) break;
                     try {
@@ -4469,16 +4490,23 @@ class ErrorBoundary extends React.Component {
                       });
                       if (res.ok) {
                         const json = await res.json();
-                        if (json.data?.createPost?.post?.id) {
+                        const postData = json.data?.createPost;
+                        if (postData?.post?.id) {
                           posted = true;
                           successCount++;
-                          addSystemLog(`✓ ${ch.name} (${ch.service}) kanalında başarıyla paylaşıldı (ID: ${json.data.createPost.post.id})`, 'success');
-                        } else if (json.data?.createPost?.message) {
-                          addSystemLog(`⚠️ ${ch.name} uyarısı: ${json.data.createPost.message}`, 'warn');
+                          addSystemLog(`✓ [BAŞARILI] ${ch.name} (${ch.service.toUpperCase()}): Post ID=${postData.post.id}, Status=${postData.post.status}`, 'success');
+                        } else if (postData?.message) {
+                          addSystemLog(`⚠️ [KANAL UYARISI] ${ch.name} (${ch.service.toUpperCase()}): ${postData.message}`, 'warn');
+                        } else if (json.errors && json.errors.length > 0) {
+                          addSystemLog(`❌ [GRAPHQL HATASI] ${ch.name}: ${json.errors.map(e => e.message).join(', ')}`, 'error');
+                        } else {
+                          addSystemLog(`⚠️ [BİLİNMEYEN YANIT] ${ch.name}: ${JSON.stringify(json)}`, 'warn');
                         }
+                      } else {
+                        addSystemLog(`❌ [HTTP HATASI] ${ch.name} (${ep}): Status HTTP ${res.status}`, 'error');
                       }
                     } catch(e) {
-                      console.warn('Buffer proxy fetch uyarısı:', e);
+                      addSystemLog(`❌ [BAĞLANTI HATASI] ${ch.name} (${ep}): ${e.message}`, 'error');
                     }
                   }
                 }
