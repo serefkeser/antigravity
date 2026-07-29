@@ -4147,19 +4147,26 @@ class ErrorBoundary extends React.Component {
                     }
                   } catch (e1) { ErrorHandler.silent(e1); }
 
-                  // Servis 2: Yerel Python Sunucu Köprüsü
-                  try {
-                    const fd0 = new FormData();
-                    fd0.append('file', blob, fileName);
-                    const r0 = await fetch('http://localhost:3000/upload_cloud_media', { method: 'POST', body: fd0 });
-                    if (r0.ok) {
-                      const j0 = await r0.json();
-                      if (j0.success && j0.url) {
-                        addSystemLog(`✓ Video/Medya buluta başarıyla yüklendi (${j0.provider || 'Python Bridge'}): ${j0.url}`, 'success');
-                        return j0.url;
+                  const isHttpsRemoteOrigin = typeof window !== 'undefined' && 
+                    window.location.protocol === 'https:' && 
+                    !window.location.hostname.includes('localhost') && 
+                    !window.location.hostname.includes('127.0.0.1');
+
+                  if (!isHttpsRemoteOrigin) {
+                    // Servis 2: Yerel Python Sunucu Köprüsü
+                    try {
+                      const fd0 = new FormData();
+                      fd0.append('file', blob, fileName);
+                      const r0 = await fetch('http://localhost:3000/upload_cloud_media', { method: 'POST', body: fd0 });
+                      if (r0.ok) {
+                        const j0 = await r0.json();
+                        if (j0.success && j0.url) {
+                          addSystemLog(`✓ Video/Medya buluta başarıyla yüklendi (${j0.provider || 'Python Bridge'}): ${j0.url}`, 'success');
+                          return j0.url;
+                        }
                       }
-                    }
-                  } catch (e0) { ErrorHandler.silent(e0); }
+                    } catch (e0) { ErrorHandler.silent(e0); }
+                  }
 
                   // Servis 2: litterbox.catbox.moe
                   try {
@@ -4206,8 +4213,7 @@ class ErrorBoundary extends React.Component {
                   !window.location.hostname.includes('127.0.0.1');
 
                 const endpoints = [
-                  ...(!isHttpsRemoteOrigin ? ['http://localhost:3000/buffer_proxy', 'http://127.0.0.1:3000/buffer_proxy'] : []),
-                  'https://corsproxy.org/?https://api.buffer.com/graphql',
+                  ...(!isHttpsRemoteOrigin ? ['http://localhost:3000/buffer_proxy'] : []),
                   'https://api.buffer.com/graphql'
                 ];
 
