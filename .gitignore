@@ -1,0 +1,22 @@
+# Security & Secrets
+.env
+*.env
+linkedin_token.json
+cert.pem
+key.pem
+*.txt
+
+# Temporary Data & Media Output
+temp_chunks/
+scratch/
+*.log
+*.tmp
+*.mp4
+*.webm
+node_modules/
+
+# OS & IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
