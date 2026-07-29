@@ -225,39 +225,40 @@ const ERROR_PATTERNS = [
 
 
 // ============================================================
-// LİNKEDİN API SUNUCU AYARLARI
-// linkedin_server.py çalışırken otomatik algılama
+// LİNKEDİN & BUFFER PROXY AYARLARI
+// Chrome Private Network Access (PNA) koruması: HTTPS ortamında localhost araması engellenir
 // ============================================================
+const isLocalhostAllowed = () => {
+  if (typeof window === 'undefined') return false;
+  const isHttp = window.location.protocol === 'http:';
+  const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  return isHttp || isLocalHost;
+};
+
 let _linkedInServerUrl = '';
 const getLinkedInServerUrl = async () => {
   if (_linkedInServerUrl) return _linkedInServerUrl;
+  if (!isLocalhostAllowed()) return '';
 
-  const isHttpsRemoteOrigin = typeof window !== 'undefined' && 
-    window.location.protocol === 'https:' && 
-    !window.location.hostname.includes('localhost') && 
-    !window.location.hostname.includes('127.0.0.1');
+  // 1. Localhost 3000 dene
+  try {
+    const r = await fetch('http://localhost:3000/', { signal: AbortSignal.timeout(1000) });
+    if (r.ok) {
+      _linkedInServerUrl = 'http://localhost:3000';
+      addSystemLog('✓ LinkedIn yerel sunucu bulundu: localhost:3000', 'success');
+      return _linkedInServerUrl;
+    }
+  } catch(e) {}
 
-  if (!isHttpsRemoteOrigin) {
-    // 1. Localhost 3000 dene
-    try {
-      const r = await fetch('http://localhost:3000/', { signal: AbortSignal.timeout(1500) });
-      if (r.ok) {
-        _linkedInServerUrl = 'http://localhost:3000';
-        addSystemLog('✓ LinkedIn yerel sunucu bulundu: localhost:3000', 'success');
-        return _linkedInServerUrl;
-      }
-    } catch(e) {}
-
-    // 2. 127.0.0.1 dene
-    try {
-      const r = await fetch('http://127.0.0.1:3000/', { signal: AbortSignal.timeout(1500) });
-      if (r.ok) {
-        _linkedInServerUrl = 'http://127.0.0.1:3000';
-        addSystemLog('✓ LinkedIn yerel sunucu bulundu: 127.0.0.1:3000', 'success');
-        return _linkedInServerUrl;
-      }
-    } catch(e) {}
-  }
+  // 2. 127.0.0.1 dene
+  try {
+    const r = await fetch('http://127.0.0.1:3000/', { signal: AbortSignal.timeout(1000) });
+    if (r.ok) {
+      _linkedInServerUrl = 'http://127.0.0.1:3000';
+      addSystemLog('✓ LinkedIn yerel sunucu bulundu: 127.0.0.1:3000', 'success');
+      return _linkedInServerUrl;
+    }
+  } catch(e) {}
 
   return '';
 };
@@ -4209,13 +4210,8 @@ class ErrorBoundary extends React.Component {
                     }
                   } catch (e1) { ErrorHandler.silent(e1); }
 
-                  const isHttpsRemoteOrigin = typeof window !== 'undefined' && 
-                    window.location.protocol === 'https:' && 
-                    !window.location.hostname.includes('localhost') && 
-                    !window.location.hostname.includes('127.0.0.1');
-
-                  if (!isHttpsRemoteOrigin) {
-                    // Servis 2: Yerel Python Sunucu Köprüsü
+                  if (isLocalhostAllowed()) {
+                    // Servis 2: Yerel Python Sunucu Köprüsü (Sadece HTTP/local ortamda)
                     try {
                       const fd0 = new FormData();
                       fd0.append('file', blob, fileName);
@@ -4269,13 +4265,9 @@ class ErrorBoundary extends React.Component {
               // Buffer API ile Anında Otomatik Sosyal Medya Paylaşımı (Dinamik Kanal Algılama + Gerçek MP4 Video Desteği)
               const shareToBufferAPI = async (text, mediaUrl = null) => {
                 const token = SafeStorage.getItem('BUFFER_API_KEY') || '';
-                const isHttpsRemoteOrigin = typeof window !== 'undefined' && 
-                  window.location.protocol === 'https:' && 
-                  !window.location.hostname.includes('localhost') && 
-                  !window.location.hostname.includes('127.0.0.1');
 
                 const endpoints = [
-                  ...(!isHttpsRemoteOrigin ? ['http://localhost:3000/buffer_proxy'] : []),
+                  ...(isLocalhostAllowed() ? ['http://localhost:3000/buffer_proxy'] : []),
                   'https://api.buffer.com/graphql'
                 ];
 
@@ -5623,6 +5615,30 @@ class ErrorBoundary extends React.Component {
                     <button onClick={shareToSelectedPlatforms} className="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 shadow-lg shadow-indigo-500/20 transition-all active:scale-95"><Share2 size={14} /> PAYLAŞ</button>
                     <button onClick={async () => { setUiState(prev => ({ ...prev, videoUrl: null, selectedMediaFiles: [], percent: 0, statusText: '', error: '' })); setConfig(prev => ({ ...prev, yorum: '', sourceName: '' })); for (let i = 0; i < RENDER_CONFIG.MAX_CUSTOM_SCENE_IMAGES; i++) await AssetManagerService.deleteMedia("CUSTOM_SCENE_IMG_" + i); setStudioMedia(s => ({ ...s, customSceneImages: [] })); }} className="bg-slate-700 hover:bg-slate-600 text-white px-5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all active:scale-95"><RotateCcw size={14} /> {(config.tip === 'guzel_soz' || config.tip === 'iddia_analizi') ? 'YENİ SÖZ' : 'YENİ HABER'}</button>
                   </div>
+
+                    {/* CANLI SISTEM & PAYLAŞIM LOGLARI (PAYLAŞ butonuna basınca görünür) */}
+                    {sysLogs && sysLogs.length > 0 && (
+                      <div className="mt-6 text-left">
+                        <div className="flex items-center justify-between mb-2 px-1">
+                          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Canlı İşlem & Paylaşım Logları</span>
+                          <span className="text-[10px] text-slate-500 font-mono">{sysLogs.length} kayit</span>
+                        </div>
+                        <div className="bg-slate-950 border border-slate-800 rounded-2xl p-3.5 font-mono text-[11px] leading-relaxed max-h-56 overflow-y-auto space-y-1.5 shadow-inner">
+                          {sysLogs.slice(-15).map((log, idx) => {
+                            let c = "text-slate-400";
+                            if (log.type === "success") c = "text-emerald-400 font-bold";
+                            if (log.type === "warn") c = "text-amber-400 font-bold";
+                            if (log.type === "error") c = "text-rose-400 font-bold animate-pulse";
+                            return (
+                              <div key={idx} className={`flex items-start gap-2 ${c}`}>
+                                <span className="text-slate-600 shrink-0 select-none">[{log.timestamp}]</span>
+                                <span className="break-all">{log.text}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
                   </div>
                   )}
               </div>
