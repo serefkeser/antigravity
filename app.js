@@ -5724,47 +5724,21 @@ ${scriptObj.tiktokHashtags.join(" ")}` : "";
     const rawTitle = workflowRef.current?.state?.script?.thumbnailText || "video";
     const safeName = rawTitle.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9\s]/g, "").trim().replace(/\s+/g, "_").toLowerCase();
     if (config.outputType === "image") {
-      const a = document.createElement("a");
-      a.href = uiState.videoUrl;
-      a.download = safeName + ".png";
-      a.click();
+      const a2 = document.createElement("a");
+      a2.href = uiState.videoUrl;
+      a2.download = safeName + ".png";
+      a2.click();
       return;
     }
     const actualBlobType = workflowRef.current?.state?.videoBlobType || "";
-    const isWebM = actualBlobType.includes("webm");
-    const wantsMP4 = config.videoFormat === "mp4";
-    if (wantsMP4) {
-      addSystemLog("Instagram uyumlu 30 FPS MP4 d\xF6n\xFC\u015Ft\xFCr\xFCl\xFCyor...", "info");
-      setUiState((prev) => ({ ...prev, statusText: "30 FPS MP4 d\xF6n\xFC\u015Ft\xFCr\xFCl\xFCyor..." }));
-      try {
-        const resp = await fetch(uiState.videoUrl);
-        const videoBlob = await resp.blob();
-        const mp4Blob = await convertWebMtoMP4(videoBlob, (pct) => {
-          if (pct % 25 === 0) addSystemLog("MP4 d\xF6n\xFC\u015Ft\xFCrme: %" + pct, "info");
-        });
-        const a = document.createElement("a");
-        a.href = ObjectURLManager.create(mp4Blob);
-        a.download = safeName + ".mp4";
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        ObjectURLManager.revoke(a.href);
-        addSystemLog("Instagram uyumlu 30 FPS MP4 indirildi: " + safeName + ".mp4", "success");
-      } catch (convErr) {
-        addSystemLog("MP4 d\xF6n\xFC\u015Ft\xFCrme ba\u015Far\u0131s\u0131z, orijinal indiriliyor: " + convErr.message, "warn");
-        const ext = actualBlobType.includes("mp4") ? ".mp4" : ".webm";
-        const a = document.createElement("a");
-        a.href = uiState.videoUrl;
-        a.download = safeName + ext;
-        a.click();
-      }
-    } else {
-      const ext = actualBlobType.includes("mp4") ? ".mp4" : ".webm";
-      const a = document.createElement("a");
-      a.href = uiState.videoUrl;
-      a.download = safeName + ext;
-      a.click();
-    }
+    const ext = actualBlobType.includes("mp4") ? ".mp4" : ".webm";
+    const a = document.createElement("a");
+    a.href = uiState.videoUrl;
+    a.download = safeName + ext;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    addSystemLog("Video tekrar indirildi: " + safeName + ext, "info");
   };
   const handleSilentRecovery = async () => {
     setUiState((prev) => ({ ...prev, isProcessing: true, statusText: "Oturum yenileniyor..." }));

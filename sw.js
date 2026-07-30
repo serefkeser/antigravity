@@ -1,4 +1,4 @@
-const CACHE_NAME = 'otonom-pwa-v1.0.15b';
+const CACHE_NAME = 'otonom-pwa-v1.0.15c';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
