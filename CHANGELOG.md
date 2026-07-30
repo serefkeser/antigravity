@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [anti 1.0.6] - 2026-07-30
+
+### Fixed & Enhanced
+- **Fixed `NetworkUtils.getProxyServerUrl` Resolution in MP4 Conversion Pipeline:** Resolved runtime `TypeError: NetworkUtils.getProxyServerUrl is not a function` in [anti.1.0.6.jsx](file:///c:/Users/skese/Downloads/antigravity/anti.1.0.6.jsx). Implemented `NetworkUtils.getProxyServerUrl` and updated `convertWebMtoMP4` to correctly resolve local Python FFmpeg endpoint (`http://localhost:3000/convert_mp4`), eliminating `SharedArrayBuffer` WASM fallback errors and guaranteeing native 30 FPS MP4 conversion.
+
+---
+
 ## [anti 1.0.5] - 2026-07-30
 
 ### Fixed & Enhanced

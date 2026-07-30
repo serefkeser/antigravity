@@ -132,7 +132,7 @@ const APP_VERSION = {
   name: 'anti 1.0',
   major: 1,
   minor: 0,
-  patch: 5,
+  patch: 6,
   toString() { return `${this.name}.${this.patch}`; },
   toBadge() { return `${this.name.toUpperCase()}.${this.patch} • Studio`; }
 };
@@ -695,7 +695,8 @@ const NetworkUtils = {
         img.src = e.target.result;
       };
       reader.readAsDataURL(file);
-    })
+    }),
+  getProxyServerUrl: async () => (await getLinkedInServerUrl()) || 'http://localhost:3000'
 };
 
 
@@ -1034,7 +1035,9 @@ const convertWebMtoMP4 = async (inputBlob, onProgress) => {
   try {
     const formData = new FormData();
     formData.append('file', inputBlob, 'input.webm');
-    const proxyUrl = NetworkUtils.getProxyServerUrl() + '/convert_mp4';
+    let baseUrl = await NetworkUtils.getProxyServerUrl();
+    if (!baseUrl) baseUrl = (await getLinkedInServerUrl()) || 'http://localhost:3000';
+    const proxyUrl = baseUrl + '/convert_mp4';
     const resp = await fetch(proxyUrl, { method: 'POST', body: formData });
     if (resp.ok) {
       const mp4Blob = await resp.blob();
