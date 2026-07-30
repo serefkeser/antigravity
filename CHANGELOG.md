@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [anti 1.0.12] - 2026-07-30
+
+### Fixed & Enhanced
+- **Fixed User Music Selection Overwrite in Render Pipeline (`anti 1.0.12`):** Resolved bug in [anti.1.0.12.jsx](file:///c:/Users/skese/Downloads/antigravity/anti.1.0.12.jsx) where `WorkflowCoordinator.executeWorkflow` overwrote the user's explicitly chosen background music with random or emotion-matched tracks. Enforced absolute priority for `this.state.preferences.ambientSound` / `SafeStorage.getItem('ns_selectedBgmId')`.
+- **Eliminated `ReactDOMClient.createRoot()` Warnings:** Added container property check (`rootEl._reactRootContainer || rootEl.__reactContainer$`) in [anti.1.0.12.jsx](file:///c:/Users/skese/Downloads/antigravity/anti.1.0.12.jsx) and [app.js](file:///c:/Users/skese/Downloads/antigravity/app.js) to guarantee 0 React console warnings across sandboxes.
+
+---
+
 ## [anti 1.0.11] - 2026-07-30
 
 ### Fixed & Enhanced

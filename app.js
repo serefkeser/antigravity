@@ -6371,9 +6371,17 @@ if (typeof document !== "undefined") {
     try {
       if (typeof ReactDOM !== "undefined" && typeof ReactDOM.createRoot === "function") {
         if (!window._reactRoot) {
-          window._reactRoot = ReactDOM.createRoot(rootEl);
+          if (!rootEl._reactRootContainer && !rootEl.__reactContainer$) {
+            try {
+              window._reactRoot = ReactDOM.createRoot(rootEl);
+            } catch (rootErr) {
+              console.warn("createRoot atlandı (zaten bağlı):", rootErr);
+            }
+          }
         }
-        window._reactRoot.render(/* @__PURE__ */ React.createElement(App, null));
+        if (window._reactRoot) {
+          window._reactRoot.render(/* @__PURE__ */ React.createElement(App, null));
+        }
       } else if (typeof ReactDOM !== "undefined" && typeof ReactDOM.render === "function") {
         ReactDOM.render(/* @__PURE__ */ React.createElement(App, null), rootEl);
       }
