@@ -167,42 +167,41 @@ const AI_CONFIG = {
 // gereken şey bu objedeki değerleri (ve dataAsOf tarihlerini) güncellemek;
 // sysPrompt bunları otomatik olarak doğru yerlere yerleştirir.
 const ECONOMIC_DATA = {
-  aclikSiniri: { value: '35.759 TL', note: 'dört kişilik aile, TÜRK-İŞ', dataAsOf: 'Haziran 2026' },
-  yoksullukSiniri: { value: '116.478 TL', note: 'dört kişilik aile, TÜRK-İŞ', dataAsOf: 'Haziran 2026' },
-  asgariUcret: { value: '28.075 TL', note: 'net', dataAsOf: 'Ocak 2026' },
-  enDusukEmekliMaasi: { value: '23.552 TL', note: '', dataAsOf: null },
-  tufeYillik: { value: '%32.11', note: 'TÜİK', dataAsOf: 'Haziran 2026' },
+  aclikSiniri: { value: '35.759 TL', note: 'dört kişilik aile, TÜRK-İŞ', dataAsOf: 'Haziran 2026', base2002: '350 TL (TÜRK-İŞ 2002)' },
+  yoksullukSiniri: { value: '116.478 TL', note: 'dört kişilik aile, TÜRK-İŞ', dataAsOf: 'Haziran 2026', base2002: '1.150 TL (TÜRK-İŞ 2002)' },
+  asgariUcret: { value: '28.075 TL', note: 'net', dataAsOf: 'Ocak 2026', base2002: '184 TL Net (2002)' },
+  enDusukEmekliMaasi: { value: '23.552 TL', note: '', dataAsOf: null, base2002: '257 TL (2002)' },
+  tufeYillik: { value: '%32.11', note: 'TÜİK', dataAsOf: 'Haziran 2026', base2002: '%29.7 (TÜİK 2002 Yıl Sonu)' },
   tufeAylik: { value: '%0.99', note: 'TÜİK', dataAsOf: 'Haziran 2026' },
   tcmbYilSonuBeklenti: { value: '%29', note: '', dataAsOf: null },
-  tcmbPolitikaFaizi: { value: '%37', note: '', dataAsOf: null },
-  dolarTl: { value: '47.05', note: '', dataAsOf: '16 Temmuz 2026' },
-  euroTl: { value: '54.07', note: '', dataAsOf: '16 Temmuz 2026' },
-  gramAltin: { value: '6.222 TL', note: '', dataAsOf: '16 Temmuz 2026' },
-  ceyrekAltin: { value: '10.223 TL', note: '', dataAsOf: '16 Temmuz 2026' },
-  issizlik: { value: '%8.2', note: '', dataAsOf: null }
+  tcmbPolitikaFaizi: { value: '%37', note: '', dataAsOf: null, base2002: '%45.0 (TCMB 2002)' },
+  dolarTl: { value: '47.05 TL', note: '', dataAsOf: '16 Temmuz 2026', base2002: '1.50 TL (2002 Ortalama)' },
+  euroTl: { value: '54.07 TL', note: '', dataAsOf: '16 Temmuz 2026', base2002: '1.50 TL (2002)' },
+  gramAltin: { value: '6.222 TL', note: '', dataAsOf: '16 Temmuz 2026', base2002: '19 TL (2002)' },
+  ceyrekAltin: { value: '10.223 TL', note: '', dataAsOf: '16 Temmuz 2026', base2002: '32 TL (2002)' },
+  issizlik: { value: '%8.2', note: '', dataAsOf: null, base2002: '%10.3 (TÜİK 2002)' }
 };
 
 // ECONOMIC_DATA'yı sysPrompt içine gömülecek okunabilir bir bloğa çevirir.
-// Rakamlar burada TEK bir yerden geliyor; artık dev bir string'in içinde
-// aranıp bulunması gerekmiyor.
 const buildEconomicDataBlock = () => {
   const d = ECONOMIC_DATA;
   const withDate = (item) => item.dataAsOf ? `${item.note ? item.note + ' ' : ''}${item.dataAsOf}`.trim() : item.note;
+  const baseStr = (item) => item.base2002 ? ` [2002 Baz Verisi: ${item.base2002}]` : '';
   return [
-    `- Aclik Siniri: ${d.aclikSiniri.value} (${withDate(d.aclikSiniri)})`,
-    `- Yoksulluk Siniri: ${d.yoksullukSiniri.value} (${withDate(d.yoksullukSiniri)})`,
-    `- Asgari Ucret: ${d.asgariUcret.value} (${withDate(d.asgariUcret)})`,
-    `- En Dusuk Emekli Maasi: ${d.enDusukEmekliMaasi.value}`,
-    `- TÜFE Yillik: ${d.tufeYillik.value} (${withDate(d.tufeYillik)})`,
-    `- TÜFE Aylik: ${d.tufeAylik.value} (${withDate(d.tufeAylik)})`,
-    `- TCMB Yil Sonu Beklenti: ${d.tcmbYilSonuBeklenti.value}`,
-    `- TCMB Politika Faizi: ${d.tcmbPolitikaFaizi.value}`,
-    `- Dolar/TL: ${d.dolarTl.value} (${d.dolarTl.dataAsOf})`,
-    `- Euro/TL: ${d.euroTl.value} (${d.euroTl.dataAsOf})`,
-    `- Gram Altin: ${d.gramAltin.value} (${d.gramAltin.dataAsOf})`,
-    `- Ceyrek Altin: ${d.ceyrekAltin.value} (${d.ceyrekAltin.dataAsOf})`,
-    `- Issizlik: ${d.issizlik.value}`
-  ].join('\\n');
+    `- Açlık Sınırı: Güncel ${d.aclikSiniri.value} (${withDate(d.aclikSiniri)})${baseStr(d.aclikSiniri)}`,
+    `- Yoksulluk Sınırı: Güncel ${d.yoksullukSiniri.value} (${withDate(d.yoksullukSiniri)})${baseStr(d.yoksullukSiniri)}`,
+    `- Asgari Ücret: Güncel ${d.asgariUcret.value} (${withDate(d.asgariUcret)})${baseStr(d.asgariUcret)}`,
+    `- En Düşük Emekli Maaşı: Güncel ${d.enDusukEmekliMaasi.value}${baseStr(d.enDusukEmekliMaasi)}`,
+    `- TÜFE Yıllık Enflasyon: Güncel ${d.tufeYillik.value} (${withDate(d.tufeYillik)})${baseStr(d.tufeYillik)}`,
+    `- TÜFE Aylık Enflasyon: Güncel ${d.tufeAylik.value} (${withDate(d.tufeAylik)})`,
+    `- TCMB Yıl Sonu Enflasyon Beklentisi: Güncel ${d.tcmbYilSonuBeklenti.value}`,
+    `- TCMB Politika Faizi: Güncel ${d.tcmbPolitikaFaizi.value}${baseStr(d.tcmbPolitikaFaizi)}`,
+    `- Dolar/TL Kuru: Güncel ${d.dolarTl.value} (${d.dolarTl.dataAsOf})${baseStr(d.dolarTl)}`,
+    `- Euro/TL Kuru: Güncel ${d.euroTl.value} (${d.euroTl.dataAsOf})${baseStr(d.euroTl)}`,
+    `- Gram Altın: Güncel ${d.gramAltin.value} (${d.gramAltin.dataAsOf})${baseStr(d.gramAltin)}`,
+    `- Çeyrek Altın: Güncel ${d.ceyrekAltin.value} (${d.ceyrekAltin.dataAsOf})${baseStr(d.ceyrekAltin)}`,
+    `- İşsizlik Oranı: Güncel ${d.issizlik.value}${baseStr(d.issizlik)}`
+  ].join('\n');
 };
 
 // ── ERROR_PATTERNS: OCR hata mesajı regex'leri (tek kaynak) ────────────────
@@ -993,14 +992,29 @@ const _loadFFmpeg = async () => {
   return _ffmpegInstance;
 };
 
-const convertWebMtoMP4 = async (webmBlob, onProgress) => {
+const convertWebMtoMP4 = async (inputBlob, onProgress) => {
   const { ffmpeg, fetchFile } = await _loadFFmpeg();
   if (onProgress) ffmpeg.setProgress(({ ratio }) => { if (ratio > 0 && ratio <= 1) onProgress(Math.round(ratio * 100)); });
-  ffmpeg.FS('writeFile', 'input.webm', await fetchFile(webmBlob));
-  await ffmpeg.run('-i', 'input.webm', '-r', '30', '-c:v', 'libx264', '-preset', 'fast', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '128k', '-movflags', '+faststart', 'output.mp4');
+  const inputFileName = inputBlob.type.includes('mp4') ? 'input.mp4' : 'input.webm';
+  ffmpeg.FS('writeFile', inputFileName, await fetchFile(inputBlob));
+  // Instagram ZORUNLULUĞU: 30.00 FPS CFR (Constant Frame Rate), H.264 High profile, YUV420P, AAC 44.1kHz
+  await ffmpeg.run(
+    '-i', inputFileName,
+    '-vf', 'fps=fps=30',
+    '-r', '30',
+    '-vsync', 'cfr',
+    '-c:v', 'libx264',
+    '-preset', 'fast',
+    '-pix_fmt', 'yuv420p',
+    '-c:a', 'aac',
+    '-b:a', '128k',
+    '-ar', '44100',
+    '-movflags', '+faststart',
+    'output.mp4'
+  );
   const data = ffmpeg.FS('readFile', 'output.mp4');
   const mp4Blob = new Blob([data.buffer], { type: 'video/mp4' });
-  try { ffmpeg.FS('unlink', 'input.webm'); ffmpeg.FS('unlink', 'output.mp4'); } catch(e) { ErrorHandler.silent(e); }
+  try { ffmpeg.FS('unlink', inputFileName); ffmpeg.FS('unlink', 'output.mp4'); } catch(e) { ErrorHandler.silent(e); }
   return mp4Blob;
 };
 
@@ -1533,7 +1547,39 @@ Dönüş ZORUNLU olarak JSON formatında olmalı.`;
     // hack'i kaldirildi. Tarih placeholder'lari gercekten dinamik.
     const _curMonthYear = _getCurrentMonthYearTR();
     const _curDate = _getCurrentDateTR();
-    const sysPrompt = `Sen bir fact-check ve ekonomi analiz uzmanisin. ASAGIDAKI GUNCEL VERILERI MUTLAKA KULLAN (${_curMonthYear}):\n\nGUNCEL EKONOMI VERILERI (${_curMonthYear}):\n${buildEconomicDataBlock()}\n\nNOT: Bu veriler TÜRK-İŞ ve TÜİK resmi verileridir. Video iceriginde MUTLAKA bu rakamlari net olarak goster. Rakamlar buyuk puntolarla yazilsin, arka plandaki goruntunun ustunde net gorunsun. Tarih belirt: ${_curMonthYear}.\n\nKURALLAR:\n1. Rakamlar NET ve BUYUK yazilacak (arka planda net gorunecek)\n2. TL olarak yaz (dolar degil)\n3. Tarih belirt: ${_curMonthYear}\n4. Kaynak belirt: TÜRK-İŞ, TÜIK\n5. Grafik varsa goster\n6. Google Search ile guncel veri bulabilirsin\n\n Gorev:\n\n1. Icerikteki DOGRULANABILIR cumleleri cikar (yorum, hakaret, kisisel gorus HARIC).\n2. Her iddiayi ayri kart yap.\n3. Her iddiayi bagimsiz analiz et.\n4. Resmi kaynaklarla karsilastir.\n5. Degerlendirme etiketi ver: Dogru, Kisman Dogru, Eksik Baglam, Yanlis, Dogrulanamiyor.\n6. Guven skoru hesapla (0-100).\n7. Kanitlari listele (kaynak + URL + veri + TARIH).\n8. Video senaryosu olustur: Hook(5sn) -> Iddia -> Aciklama -> Kanitlar -> Sonuc -> Kapanis.\n9. Kalite kontrol yap.\n\nZORUNLU EKONOMI VERILERI (video iceriginde MUTLAKA yazilacak):\n- Enflasyon: Guncel TÜFE (yillik %), aylik %, TARIHI ile birlikte\n- TCMB Yil Sonu Enflasyon Beklentisi: % kac, gerceklesen: % kac\n- Politika Faizi: % kac\n- Acik Siniri: XXXXX TL (TARIHI: ${_curMonthYear} gibi, TÜRK-İŞ)\n- Yoksulluk Siniri: XXXXX TL (TARIHI ile)\n- Acik Siniri altinda kac kisi: X milyon\n- Yoksulluk siniri altinda kac kisi: X milyon\n- Asgari Ucret: XXXXX TL (net)\n- En Dusuk Emekli Maasi: XXXXX TL\n- Ortalama Memur Maasi: XXXXX TL\n- Ortalama Isci Maasi: XXXXX TL\n- Dolar/TL: XX.XX TL\n- Euro/TL: XX.XX TL\n- Gram Altin: XXXXX TL\n- Ceyrek Altin: XXXXX TL\n- Issizlik Orani: % X.X\n- Buyume (GDP): % X.X\n- Gini Katsayisi: 0.XXX\n\nKURALLAR:\n1. Tum rakamlar NET TL olarak yazilacak (orn: 26.500 TL, $ degil)\n2. Tarih belirtilecek (orn: TÜİK ${_curMonthYear} verilerine gore...)\n3. Eski veri kullanma, en guncel veriyi bul (en fazla 1-2 ay onceki)\n4. Enflasyon icin hem gerceklesen hem beklenti yaz\n5. Aclik/yoksulluk siniri MUTLAKA TL olarak ve tarihle birlikte yaz\n6. Kac kisi acik/yoksulluk siniri altinda MUTLAKA yaz\n7. Sayi bicimi: 26.500 TL (nokta binlik ayrac)\n8. Grafik varsa goster (enflasyon trendi, dolar kuru degisimi vb)\n9. Kaynak belirt: TÜİK, TCMB, TÜRK-İŞ, OECD\n\nHer sahne NOKTA ile biten cumle olmali. Donus ZORUNLU JSON.`;
+    const sysPrompt = `Sen Türkiye gerçeklerine tam hakim, tarafsız, mutlak doğruluktan ödün vermeyen kıdemli bir Fact-Check (Doğrulama) ve Ekonomi Analiz Uzmanısın.
+
+ŞU ANDAKİ GÜNCEL TARİH VE DÖNEM: ${_curMonthYear} (Bütün tarih ve dönem ifadelerinde bu güncel tarihi kullan).
+
+ZORUNLU MİSYON VE ANALİZ KURALLARI:
+
+1. BİREBİR VE ÖZGÜN ANALİZ (EZBER/KALIP CÜMLE YASAKTIR):
+   - Yüklenen girdiyi (metin, görsel, video, URL) tamamen birebir ve özgün olarak analiz et. Sürekli aynı basma kalıp şablonları tekrarlama.
+   - İçerikteki DOĞRULANABİLİR iddia ve cümleleri tek tek çıkar (kişisel görüş, temenni ve hakaretler hariç). Her iddiayı bağımsız kart olarak incele.
+
+2. 2002 YILI BAZ ALINARAK TARİHSEL DÖNÜŞÜM KARŞILAŞTIRMASI:
+   - İddia veya analiz konusu ekonomi, alım gücü, maaşlar, enflasyon, döviz kurları veya kamu politikası ise; MUTLAKA 2002 YILINDAKİ RESMİ VERİ İLE KIYASLAMA YAP ("2002 yılında X verisi şu kadardı, günümüz ${_curMonthYear} itibarıyla şu oldu" şeklinde dönüşümü açıkça vurgula).
+   - 2002'deki alım gücü (örneğin kaç adet çeyrek altın alınabiliyordu, kaç TL asgari ücretti) ile ${_curMonthYear} günümüzdeki alım gücünü karşılaştır.
+
+3. TÜRKİYE GERÇEKLERİ VE RESMİ KAYNAK ZORUNLULUĞU:
+   - Bütün değerlendirmelerini Türkiye'nin reel yaşam koşulları, TÜİK, TCMB, TÜRK-İŞ, Hazine ve Maliye Bakanlığı, BDDK gibi resmi kurum verileriyle yap.
+   - Analiz metninde ve çıkarılan kanıtlarda MUTLAKA RESMİ KAYNAK ADINI (TÜİK, TCMB, TÜRK-İŞ vb.) ve VERİ TARİHİNİ (${_curMonthYear}) AÇIKÇA YAZ. İzleyici okuduğunda ve dinlediğinde %100 tatmin ve ikna olmalıdır.
+
+4. MUTLAK DOĞRULUK VE ŞEFFAFLIK (ASLA YALAN YAZMA / BİLMİYORSAN "BİLMİYORUM" DE):
+   - Asla tahmini, uydurma, yalan veya doğrulanamayan veri sunma. Daima sadece gerçeği söyle.
+   - Resmi kurum verisi bulunmayan, muğlak veya kanıtlanamayan iddialar için ÇEKİNMEDEN durum etiketini "Doğrulanabiliyor / Veri Yetersiz" olarak belirle ve analiz açıklamasında "Resmi kaynaklarda bu iddiayı doğrudan doğrulayacak açık veri bulunmamaktadır" de.
+
+5. GÜNCEL RESMİ EKONOMİ VE TARİHSEL BAZ VERİLERİ (${_curMonthYear}):
+${buildEconomicDataBlock()}
+
+6. GÖREV VE ÇIKTI AKIŞI:
+   - İçerikteki doğrulanabilir cümleleri ayıkla ve her iddia için ayrı bir analiz kartı oluştur.
+   - Durum etiketleri: 'Doğru', 'Kısmen Doğru', 'Eksik Bağlam', 'Yanlış', 'Doğrulanabiliyor / Veri Yetersiz'.
+   - Güven skoru: 0-100 arası.
+   - Kanıtlar: Resmi Kaynak Adı + Tarih (${_curMonthYear}) + Resmi Veri.
+   - Video senaryosu (videoSlides): 5sn Vurucu Hook -> İddia Metni -> 2002 vs ${_curMonthYear} Dönüşüm Analizi -> Resmi Kanıtlar ve Rakamlar -> Sonuç Özet.
+
+Dönüş ZORUNLU olarak geçerli JSON formatında olmalıdır.`;
 
     const payload = {
       contents: [{ role: 'user', parts: parts }],
@@ -2257,13 +2303,9 @@ class MediaSynthesisService {
         // Manuel kare modu: captureStream(0) + requestFrame() her karede çağrılır
         // Bu arka planda da 30fps garanti eder (captureStream(30) otomatik mod ~1fps'e düşürür)
         if (audioDest) { audioDest.stream.getAudioTracks().forEach(t => stream.addTrack(t)); }
-        // Format seçimini config'den al — MP4 veya WebM
+        // İç işleme için her zaman WebM kaydedilir (Instagram/MP4 dönüşümü 30fps CFR garanti eden ffmpeg ile yapılır)
         let mimeType = 'video/webm; codecs=vp8,opus';
-        if (jobData.config.videoFormat === 'mp4') {
-          if (MediaRecorder.isTypeSupported('video/mp4; codecs="avc1.42E01E, mp4a.40.2"')) mimeType = 'video/mp4; codecs="avc1.42E01E, mp4a.40.2"';
-          else if (MediaRecorder.isTypeSupported('video/mp4')) mimeType = 'video/mp4';
-        }
-        if (!MediaRecorder.isTypeSupported(mimeType)) { mimeType = 'video/webm;codecs=vp8,opus'; if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/webm'; }
+        if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/webm';
         const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 4000000, audioBitsPerSecond: 128000 });
         const chunks = [];
         recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
@@ -2488,8 +2530,7 @@ class MediaSynthesisService {
         const audioTracks = audioDest ? audioDest.stream.getAudioTracks() : [];
         const combinedStream = new MediaStream([...stream.getVideoTracks(), ...audioTracks]);
         let mimeType = 'video/webm; codecs="vp8, opus"';
-        if (jobData.config.videoFormat === 'mp4') { if (MediaRecorder.isTypeSupported('video/mp4; codecs="avc1.42E01E, mp4a.40.2"')) mimeType = 'video/mp4; codecs="avc1.42E01E, mp4a.40.2"'; else if (MediaRecorder.isTypeSupported('video/mp4')) mimeType = 'video/mp4'; }
-        if (!MediaRecorder.isTypeSupported(mimeType)) { mimeType = 'video/webm;codecs=vp8,opus'; if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/webm'; }
+        if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/webm';
 
         const playAudio = async (audioData, requestedDuration = null, fallbackText = "") => {
           if (audioCtx && audioCtx.state === 'suspended') await audioCtx.resume().catch((e) => { ErrorHandler.silent(e); });
@@ -4129,23 +4170,21 @@ class ErrorBoundary extends React.Component {
                   let finalBlob = blob;
                   let ext = '.webm';
 
-                  // Kullanıcı MP4 istiyor ama blob WebM → ffmpeg.wasm ile dönüştür
-                  if (wantsMP4 && isWebM) {
-                    addSystemLog('WebM → MP4 dönüştürülüyor...', 'info');
+                  // Kullanıcı MP4 istiyor ise HER ZAMAN 30 FPS CFR garanti eden ffmpeg dönüştürücüsünden geçir
+                  if (wantsMP4) {
+                    addSystemLog('Instagram uyumlu 30 FPS MP4 üretiliyor...', 'info');
                     try {
                       finalBlob = await convertWebMtoMP4(blob, (pct) => {
                           if (pct % 25 === 0) addSystemLog(`MP4 dönüştürme: %${pct}`, 'info');
                         });
                       ext = '.mp4';
-                      addSystemLog('MP4 dönüştürme tamamlandı.', 'success');
+                      addSystemLog('Instagram uyumlu 30 FPS MP4 tamamlandı.', 'success');
                     } catch (convErr) {
                       addSystemLog(`MP4 dönüştürme başarısız, WebM indiriliyor: ${convErr.message}`, 'warn');
-                      ext = '.webm';
+                      ext = isWebM ? '.webm' : '.mp4';
                     }
-                  } else if (wantsMP4 && (blob.type.includes('mp4') || actualBlobType.includes('mp4'))) {
-                    ext = '.mp4';
                   } else {
-                    ext = '.webm';
+                    ext = isWebM ? '.webm' : '.mp4';
                   }
 
                   const safeName = title.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9\s]/g, "").trim().replace(/\s+/g, "_").toLowerCase();
@@ -4214,6 +4253,18 @@ class ErrorBoundary extends React.Component {
                   if (!(blob instanceof Blob)) {
                     if (typeof blobOrUrl === 'string' && blobOrUrl.startsWith('http')) return blobOrUrl;
                     return null;
+                  }
+
+                  // Instagram / Buffer ZORUNLULUĞU: Videoları 30.00 FPS CFR MP4 formatına getir
+                  if (blob.type.includes('video') || fileName.endsWith('.mp4') || fileName.endsWith('.webm')) {
+                    addSystemLog('Instagram/Buffer için 30 FPS MP4 kontrolü ve dönüşümü yapılıyor...', 'info');
+                    try {
+                      blob = await convertWebMtoMP4(blob);
+                      fileName = fileName.replace(/\.[^.]+$/, '') + '.mp4';
+                      addSystemLog('✓ Instagram uyumlu 30 FPS MP4 hazırlandı.', 'success');
+                    } catch (err) {
+                      addSystemLog(`MP4 dönüşüm uyarısı: ${err.message}`, 'warn');
+                    }
                   }
 
                   addSystemLog('Video/Medya buluta yükleniyor (Buffer yayın hazırlığı)...', 'info');
@@ -4875,22 +4926,23 @@ class ErrorBoundary extends React.Component {
                 const actualBlobType = workflowRef.current?.state?.videoBlobType || '';
                 const isWebM = actualBlobType.includes('webm');
                 const wantsMP4 = config.videoFormat === 'mp4';
-                if (wantsMP4 && isWebM) {
-                  addSystemLog('WebM → MP4 dönüştürülüyor...', 'info');
-                  setUiState(prev => ({ ...prev, statusText: 'MP4 dönüştürülüyor...' }));
+                if (wantsMP4) {
+                  addSystemLog('Instagram uyumlu 30 FPS MP4 dönüştürülüyor...', 'info');
+                  setUiState(prev => ({ ...prev, statusText: '30 FPS MP4 dönüştürülüyor...' }));
                   try {
                     const resp = await fetch(uiState.videoUrl);
-                    const webmBlob = await resp.blob();
-                    const mp4Blob = await convertWebMtoMP4(webmBlob, (pct) => { if (pct % 25 === 0) addSystemLog('MP4 dönüştürme: %' + pct, 'info'); });
+                    const videoBlob = await resp.blob();
+                    const mp4Blob = await convertWebMtoMP4(videoBlob, (pct) => { if (pct % 25 === 0) addSystemLog('MP4 dönüştürme: %' + pct, 'info'); });
                     const a = document.createElement('a');
                     a.href = ObjectURLManager.create(mp4Blob);
                     a.download = safeName + '.mp4';
                     document.body.appendChild(a); a.click(); document.body.removeChild(a);
                     ObjectURLManager.revoke(a.href);
-                    addSystemLog('MP4 indirildi: ' + safeName + '.mp4', 'success');
+                    addSystemLog('Instagram uyumlu 30 FPS MP4 indirildi: ' + safeName + '.mp4', 'success');
                   } catch (convErr) {
-                    addSystemLog('MP4 dönüştürme başarısız, WebM indiriliyor: ' + convErr.message, 'warn');
-                    const a = document.createElement('a'); a.href = uiState.videoUrl; a.download = safeName + '.webm'; a.click();
+                    addSystemLog('MP4 dönüştürme başarısız, orijinal indiriliyor: ' + convErr.message, 'warn');
+                    const ext = actualBlobType.includes('mp4') ? '.mp4' : '.webm';
+                    const a = document.createElement('a'); a.href = uiState.videoUrl; a.download = safeName + ext; a.click();
                   }
                 } else {
                   const ext = actualBlobType.includes('mp4') ? '.mp4' : '.webm';
