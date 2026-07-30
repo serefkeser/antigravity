@@ -300,6 +300,23 @@ class LinkedInHandler(BaseHTTPRequestHandler):
         path = parsed_path.path
         query = urllib.parse.parse_qs(parsed_path.query)
 
+        if path in ["/app", "/index.html", "/manifest.json", "/sw.js"] or path.endswith(".jsx") or path.endswith(".png") or path.endswith(".ico"):
+            filename = "index.html" if path in ["/app", "/index.html"] else path.lstrip("/")
+            filepath = os.path.join(os.path.dirname(__file__), filename)
+            if os.path.exists(filepath):
+                mime = "text/html"
+                if filename.endswith(".json"): mime = "application/json"
+                elif filename.endswith(".js") or filename.endswith(".jsx"): mime = "application/javascript"
+                elif filename.endswith(".png"): mime = "image/png"
+                with open(filepath, "rb") as f:
+                    content = f.read()
+                self.send_response(200)
+                self.send_header("Content-Type", f"{mime}; charset=utf-8" if ("text" in mime or "json" in mime or "javascript" in mime) else mime)
+                self.send_cors_headers()
+                self.end_headers()
+                self.wfile.write(content)
+                return
+
         if path == "/" or path == "":
             token_data = load_token()
             is_auth = token_data is not None and "access_token" in token_data
@@ -307,7 +324,8 @@ class LinkedInHandler(BaseHTTPRequestHandler):
                 "status": "ok",
                 "authenticated": is_auth,
                 "user_name": token_data.get("name") if is_auth else None,
-                "login_url": f"http://localhost:{PORT}/login"
+                "login_url": f"http://localhost:{PORT}/login",
+                "app_url": f"http://localhost:{PORT}/app"
             })
             return
 
