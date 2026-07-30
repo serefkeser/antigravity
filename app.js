@@ -6381,14 +6381,11 @@ if (typeof document !== "undefined") {
   if (rootEl) {
     try {
       if (typeof ReactDOM !== "undefined" && typeof ReactDOM.createRoot === "function") {
-        if (!window._reactRoot) {
-          if (!rootEl._reactRootContainer && !rootEl.__reactContainer$) {
-            try {
-              window._reactRoot = ReactDOM.createRoot(rootEl);
-            } catch (rootErr) {
-              console.warn("createRoot atland\u0131 (zaten ba\u011Fl\u0131):", rootErr);
-            }
-          }
+        const alreadyMounted = Object.keys(rootEl).some(
+          (k) => k.startsWith("__reactFiber$") || k.startsWith("__reactContainer$") || k.startsWith("__reactInternalInstance$")
+        );
+        if (!window._reactRoot && !alreadyMounted) {
+          window._reactRoot = ReactDOM.createRoot(rootEl);
         }
         if (window._reactRoot) {
           window._reactRoot.render(/* @__PURE__ */ React.createElement(App, null));

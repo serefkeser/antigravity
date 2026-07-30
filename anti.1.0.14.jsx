@@ -5904,14 +5904,13 @@ if (typeof document !== 'undefined') {
   if (rootEl) {
     try {
       if (typeof ReactDOM !== 'undefined' && typeof ReactDOM.createRoot === 'function') {
-        if (!window._reactRoot) {
-          if (!rootEl._reactRootContainer && !rootEl.__reactContainer$) {
-            try {
-              window._reactRoot = ReactDOM.createRoot(rootEl);
-            } catch(rootErr) {
-              console.warn("createRoot atlandı (zaten bağlı):", rootErr);
-            }
-          }
+        // React 18 fiber key'i dinamik hash içerir (örn: __reactFiber$abc123)
+        // Statik key kontrolü yerine dinamik arama yap
+        const alreadyMounted = Object.keys(rootEl).some(
+          k => k.startsWith('__reactFiber$') || k.startsWith('__reactContainer$') || k.startsWith('__reactInternalInstance$')
+        );
+        if (!window._reactRoot && !alreadyMounted) {
+          window._reactRoot = ReactDOM.createRoot(rootEl);
         }
         if (window._reactRoot) {
           window._reactRoot.render(<App />);
