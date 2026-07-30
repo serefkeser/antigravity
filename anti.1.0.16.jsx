@@ -133,7 +133,7 @@ const APP_VERSION = {
   name: 'anti 1.0',
   major: 1,
   minor: 0,
-  patch: 15,
+  patch: 16,
   toString() { return `${this.name}.${this.patch}`; },
   toBadge() { return `${this.name.toUpperCase()}.${this.patch} • Studio`; }
 };
@@ -1662,8 +1662,8 @@ ZORUNLU MİSYON VE İDDİA ANALİZ KURALLARI:
    - İçerikteki DOĞRULANABİLİR iddia ve cümleleri tek tek çıkar (kişisel görüş, temenni ve hakaretler hariç). Her iddiayı bağımsız kart olarak incele.
 
 2. KESİNTİSİZ SES VEYA VİDEO OYNATMA ZORUNLULUĞU (HİÇBİR YERİ KESİLMEDEN):
-   - Clickbait kapak / hook sahnesinden HEMEN SONRA, yüklenen ses veya video HİÇBİR YERİ KESİLMEDEN OLDUĞU GİBİ TAM OYNATILMALIDIR!
-   - Orijinal medya eksiksiz olarak dinletildikten/izletildikten HEMEN SONRA detaylı analiz ve doğrulama aşamasına geçilecektir.
+   - Clickbait (ilk sahne) biter bitmez, oluşturacağın İKİNCİ sahnede \`playOriginalMedia: true\` özelliğini ayarla. Bu sahnede \`spokenText\` ve \`topText\` boş bırakılabilir, sadece orijinal medyanın kesintisiz oynatılması için bir yer tutucu olacaktır.
+   - Orijinal medya eksiksiz olarak dinletildikten/izletildikten HEMEN SONRA detaylı analiz ve doğrulama aşamasına (3. sahneye) geçilecektir.
 
 3. YAŞANAN SOMUT OLAYLAR, ADALET VE EMSAL ÖRNEKLERLE İFŞA:
    - Medya dinletildikten/izletildikten sonra, iddiadaki yanlışlar veya eksikler GERÇEKTE YAŞANAN SOMUT OLAYLAR, MAHKEME/ADALET KARARLARI, EMSAL VAKALAR VE REEL YAŞAM VERİLERİ ÖRNEK VERİLEREK NET ŞEKİLDE İFŞA EDİLECEKTİR.
@@ -1685,7 +1685,7 @@ ZORUNLU MİSYON VE İDDİA ANALİZ KURALLARI:
 ${buildEconomicDataBlock()}
 
 8. GÖREV VE VİDEO SENARYO AKIŞI (videoSlides):
-   - 5sn Vurucu Clickbait Hook -> Yüklenen Ses veya Videonun Kesintisiz Tam Oynatımı -> Yaşanan Somut Olay / Adalet Emsali / İfşa Örneği -> En Güncel Devlet Verisi (${_curMonthYear}) & 2002 Karşılaştırması -> Resmi Kaynaklı Sonuç ve Kapanış.${LogicEngineService._buildSonSozRule()}
+   - 5sn Vurucu Clickbait Hook -> İkinci sahnede \`playOriginalMedia: true\` (Yüklenen Ses veya Videonun Kesintisiz Tam Oynatımı) -> Üçüncü sahnede Yaşanan Somut Olay / Adalet Emsali / İfşa Örneği -> En Güncel Devlet Verisi (${_curMonthYear}) & 2002 Karşılaştırması -> Resmi Kaynaklı Sonuç ve Kapanış.${LogicEngineService._buildSonSozRule()}
 
 Dönüş ZORUNLU olarak geçerli JSON formatında olmalıdır.`;
 
@@ -1698,7 +1698,7 @@ Dönüş ZORUNLU olarak geçerli JSON formatında olmalıdır.`;
           type: 'OBJECT',
           properties: {
             isContentUnreadable: { type: 'BOOLEAN' },
-            videoSlides: { type: 'ARRAY', items: { type: 'OBJECT', properties: { topText: { type: 'STRING' }, spokenText: { type: 'STRING' }, imagePrompts: { type: 'ARRAY', items: { type: 'STRING' } } }, required: ['topText', 'spokenText', 'imagePrompts'] } },
+            videoSlides: { type: 'ARRAY', items: { type: 'OBJECT', properties: { topText: { type: 'STRING' }, spokenText: { type: 'STRING' }, playOriginalMedia: { type: 'BOOLEAN' }, imagePrompts: { type: 'ARRAY', items: { type: 'STRING' } } }, required: ['topText', 'spokenText', 'imagePrompts'] } },
             thumbnailText: { type: 'STRING' },
             sonSoz: { type: 'STRING' },
             lastQuote: { type: 'STRING' },
@@ -2608,7 +2608,7 @@ class MediaSynthesisService {
         const targetDurStr = jobData.config.duration || '30'; const isUnlimited = targetDurStr === 'unlimited';
         // Birden fazla blok varsa süre sınırı yok — doğal okuma hızında bitir
         const hasMultipleBlocks = (jobData.script.imageBlocks || []).length > 1;
-        const useForceExact = !isUnlimited && !hasMultipleBlocks;
+        const useForceExact = !isUnlimited && !hasMultipleBlocks && !jobData.script.videoSlides.some(s => s.playOriginalMedia);
         const bounds = getDurationBounds(targetDurStr); const limitSec = useForceExact ? bounds.max : 9999;
         let globalRenderedSec = 0;
         const getAudioDur = (audioData, fallbackText) => { if (audioData?.wavBuffer) { let byteLength = 0; if (audioData.wavBuffer instanceof ArrayBuffer) byteLength = audioData.wavBuffer.byteLength; else if (audioData.wavBuffer.buffer instanceof ArrayBuffer) byteLength = audioData.wavBuffer.buffer.byteLength; else if (audioData.wavBuffer.byteLength) byteLength = audioData.wavBuffer.byteLength; if (byteLength > 44) { const sampleRate = audioData.sampleRate || 24000; return (byteLength - 44) / (sampleRate * 2); } } const wordsCount = (fallbackText || "").trim().split(/\s+/).filter(Boolean).length; if (wordsCount === 0) return 0.5; return Math.max(1.0, wordsCount / getWPS(jobData.config.language)); };
@@ -2757,6 +2757,85 @@ class MediaSynthesisService {
         // ============================================================================
 
         const SAFE_ZONE = { topUnsafe: 0.08, subtitleY: 0.72, bottomUnsafe: 0.78, rightUnsafeStart: 0.86 };
+
+        const renderOriginalMediaScene = async () => {
+          const mediaFiles = (Array.isArray(jobData.inputData) ? jobData.inputData : []).filter(f => f.type && (f.type.startsWith('video/') || f.type.startsWith('audio/')));
+          if (!mediaFiles || mediaFiles.length === 0) return;
+          const origMediaFile = mediaFiles[0];
+          const isVideo = origMediaFile.type.startsWith('video/');
+          
+          return new Promise((resolve) => {
+            const mediaEl = document.createElement(isVideo ? 'video' : 'audio');
+            const rawData = origMediaFile.data.includes(',') ? origMediaFile.data.split(',')[1] : origMediaFile.data;
+            const blob = _base64ToBlob(rawData, origMediaFile.type);
+            const url = ObjectURLManager.create(blob);
+            
+            mediaEl.src = url;
+            mediaEl.crossOrigin = "anonymous";
+            if (isVideo) mediaEl.playsInline = true;
+            
+            let sourceNode = null;
+            if (audioCtx && audioDest) {
+              try {
+                sourceNode = audioCtx.createMediaElementSource(mediaEl);
+                sourceNode.connect(audioDest);
+              } catch(e) { ErrorHandler.silent(e); }
+            }
+            
+            let isEnded = false;
+            const finish = () => {
+              if (isEnded) return;
+              isEnded = true;
+              if (sourceNode) { try { sourceNode.disconnect(); } catch(e){} }
+              ObjectURLManager.revoke(url);
+              resolve();
+            };
+            
+            mediaEl.onended = finish;
+            mediaEl.onerror = finish;
+            
+            mediaEl.play().then(async () => {
+              while (!isEnded && !mediaEl.paused) {
+                // Draw background
+                ctx.fillStyle = "#000000";
+                ctx.fillRect(0, 0, w, h);
+                
+                if (isVideo && mediaEl.videoWidth > 0) {
+                  const scale = Math.min(w / mediaEl.videoWidth, h / mediaEl.videoHeight);
+                  const dw = mediaEl.videoWidth * scale;
+                  const dh = mediaEl.videoHeight * scale;
+                  const dx = (w - dw) / 2;
+                  const dy = (h - dh) / 2;
+                  ctx.drawImage(mediaEl, dx, dy, dw, dh);
+                } else {
+                  ctx.fillStyle = "#1a1a1a";
+                  ctx.fillRect(0, 0, w, h);
+                  ctx.fillStyle = "#ffffff";
+                  ctx.font = `900 40px ${fontFamily}`;
+                  ctx.textAlign = 'center';
+                  ctx.fillText("Orijinal Medya Oynatılıyor...", w/2, h/2);
+                }
+                
+                // Add watermark
+                ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
+                ctx.font = `900 24px ${fontFamily}`;
+                ctx.textAlign = 'right';
+                ctx.fillText("ORİJİNAL KAYIT", w - 20, 40);
+                
+                // Ask the stream to capture this frame
+                if (stream && stream.getVideoTracks().length > 0) {
+                  try { stream.getVideoTracks()[0].requestFrame(); } catch(e) {}
+                }
+                
+                await nextFrame();
+              }
+              finish();
+            }).catch(err => {
+              addSystemLog("Orijinal medya başlatılamadı: " + err.message, "warn");
+              finish();
+            });
+          });
+        };
 
         const renderScene = async (imgObj, text, audioData, duration, isThumbnail = false, isOutro = false, topText = null, slideIndex = -1, chartData = null, transition = 'none', useContain = false, zoomCoords = null) => {
           let startT = performance.now(); const { exactDur, totalDur, audioEndPromise } = await playAudio(audioData, duration, text);
@@ -3240,6 +3319,13 @@ class MediaSynthesisService {
             // === Yüklenen slaytlar atlanmaz — her biri tam seslendirilene kadar render edilir ===
             // (useForceExact süre limiti slayt atlamak için değil, kelime sayısını ayarlamak içindir)
             const slide = jobData.script.videoSlides[i];
+            
+            if (slide.playOriginalMedia) {
+              sysEventBus.emit('PROGRESS', { step: 'RENDER', percent: Math.min(80, 20 + ((i + 1) / jobData.script.videoSlides.length) * 60), text: `Orijinal Medya Oynatılıyor...` });
+              await renderOriginalMediaScene();
+              continue;
+            }
+            
             sysEventBus.emit('PROGRESS', { step: 'RENDER', percent: Math.min(80, 20 + ((i + 1) / jobData.script.videoSlides.length) * 60), text: `Sahne ${i + 1} Render Ediliyor...` });
             // BAŞLIKLAR sahnesi image yükleme atla
             const isBasliklarScene = slide._isBasliklarList && slide._basliklar;
