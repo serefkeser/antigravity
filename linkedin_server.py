@@ -586,6 +586,67 @@ class LinkedInHandler(BaseHTTPRequestHandler):
             self.send_json(500, {"error": "Bulut yüklemesi başarısız oldu"})
             return
 
+        if path == "/convert_mp4":
+            content_type = self.headers.get("Content-Type", "")
+            content_length = int(self.headers.get("Content-Length", 0))
+            fields, files = parse_multipart_data(self.rfile, content_type, content_length)
+            media_file = files.get("file") or (list(files.values())[0] if files else None)
+            if not media_file:
+                self.send_json(400, {"error": "No video file provided"})
+                return
+
+            timestamp = int(time.time() * 1000)
+            in_path = os.path.join(TEMP_DIR, f"input_{timestamp}.webm")
+            out_path = os.path.join(TEMP_DIR, f"output_{timestamp}.mp4")
+
+            try:
+                with open(in_path, "wb") as f:
+                    f.write(media_file.get("data", b""))
+
+                import subprocess
+                cmd = [
+                    "ffmpeg", "-y",
+                    "-i", in_path,
+                    "-vf", "fps=fps=30",
+                    "-r", "30",
+                    "-vsync", "cfr",
+                    "-c:v", "libx264",
+                    "-preset", "fast",
+                    "-pix_fmt", "yuv420p",
+                    "-c:a", "aac",
+                    "-b:a", "128k",
+                    "-ar", "44100",
+                    "-movflags", "+faststart",
+                    out_path
+                ]
+                res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=60)
+                if res.returncode == 0 and os.path.exists(out_path):
+                    with open(out_path, "rb") as f:
+                        mp4_bytes = f.read()
+                    self.send_response(200)
+                    self.send_header("Content-Type", "video/mp4")
+                    self.send_header("Content-Length", str(len(mp4_bytes)))
+                    self.send_header("Access-Control-Allow-Origin", "*")
+                    self.end_headers()
+                    self.wfile.write(mp4_bytes)
+                    return
+                else:
+                    err_msg = res.stderr.decode("utf-8", errors="ignore")
+                    print(f"[FFMPEG ERROR] {err_msg}")
+                    self.send_json(500, {"error": f"ffmpeg failed: {err_msg}"})
+                    return
+            except Exception as e:
+                print(f"[CONVERT MP4 EXCEPTION] {e}")
+                self.send_json(500, {"error": str(e)})
+                return
+            finally:
+                if os.path.exists(in_path):
+                    try: os.remove(in_path)
+                    except: pass
+                if os.path.exists(out_path):
+                    try: os.remove(out_path)
+                    except: pass
+
         token_data = load_token()
         if not token_data or "access_token" not in token_data:
             self.send_json(401, {

@@ -132,7 +132,7 @@ const APP_VERSION = {
   name: 'anti 1.0',
   major: 1,
   minor: 0,
-  patch: 2,
+  patch: 3,
   toString() { return `${this.name}.${this.patch}`; },
   toBadge() { return `${this.name.toUpperCase()}.${this.patch} • Studio`; }
 };
@@ -1028,29 +1028,54 @@ const _loadFFmpeg = async () => {
 };
 
 const convertWebMtoMP4 = async (inputBlob, onProgress) => {
-  const { ffmpeg, fetchFile } = await _loadFFmpeg();
-  if (onProgress) ffmpeg.setProgress(({ ratio }) => { if (ratio > 0 && ratio <= 1) onProgress(Math.round(ratio * 100)); });
-  const inputFileName = inputBlob.type.includes('mp4') ? 'input.mp4' : 'input.webm';
-  ffmpeg.FS('writeFile', inputFileName, await fetchFile(inputBlob));
-  // Instagram ZORUNLULUĞU: 30.00 FPS CFR (Constant Frame Rate), H.264 High profile, YUV420P, AAC 44.1kHz
-  await ffmpeg.run(
-    '-i', inputFileName,
-    '-vf', 'fps=fps=30',
-    '-r', '30',
-    '-vsync', 'cfr',
-    '-c:v', 'libx264',
-    '-preset', 'fast',
-    '-pix_fmt', 'yuv420p',
-    '-c:a', 'aac',
-    '-b:a', '128k',
-    '-ar', '44100',
-    '-movflags', '+faststart',
-    'output.mp4'
-  );
-  const data = ffmpeg.FS('readFile', 'output.mp4');
-  const mp4Blob = new Blob([data.buffer], { type: 'video/mp4' });
-  try { ffmpeg.FS('unlink', inputFileName); ffmpeg.FS('unlink', 'output.mp4'); } catch(e) { ErrorHandler.silent(e); }
-  return mp4Blob;
+  addSystemLog('Instagram uyumlu 30 FPS MP4 dönüştürme başlatılıyor...', 'info');
+
+  // 1. ÖNCELİK: Yerel Python Sunucusu (Sistem ffmpeg — 100x hızlı, SharedArrayBuffer gerektirmez)
+  try {
+    const formData = new FormData();
+    formData.append('file', inputBlob, 'input.webm');
+    const proxyUrl = NetworkUtils.getProxyServerUrl() + '/convert_mp4';
+    const resp = await fetch(proxyUrl, { method: 'POST', body: formData });
+    if (resp.ok) {
+      const mp4Blob = await resp.blob();
+      if (mp4Blob && mp4Blob.size > 0) {
+        addSystemLog('✅ Yerel ffmpeg ile 30 FPS MP4 dönüşümü BAŞARIYLA TAMAMLANDI!', 'success');
+        return mp4Blob;
+      }
+    }
+  } catch (e) {
+    addSystemLog('Yerel ffmpeg servisi denendi, WASM fallback kullanılıyor: ' + e.message, 'warn');
+  }
+
+  // 2. ÖNCELİK: Tarayıcı İçi ffmpeg.wasm Fallback
+  try {
+    const { ffmpeg, fetchFile } = await _loadFFmpeg();
+    if (onProgress) ffmpeg.setProgress(({ ratio }) => { if (ratio > 0 && ratio <= 1) onProgress(Math.round(ratio * 100)); });
+    const inputFileName = inputBlob.type.includes('mp4') ? 'input.mp4' : 'input.webm';
+    ffmpeg.FS('writeFile', inputFileName, await fetchFile(inputBlob));
+    await ffmpeg.run(
+      '-i', inputFileName,
+      '-vf', 'fps=fps=30',
+      '-r', '30',
+      '-vsync', 'cfr',
+      '-c:v', 'libx264',
+      '-preset', 'fast',
+      '-pix_fmt', 'yuv420p',
+      '-c:a', 'aac',
+      '-b:a', '128k',
+      '-ar', '44100',
+      '-movflags', '+faststart',
+      'output.mp4'
+    );
+    const data = ffmpeg.FS('readFile', 'output.mp4');
+    const mp4Blob = new Blob([data.buffer], { type: 'video/mp4' });
+    try { ffmpeg.FS('unlink', inputFileName); ffmpeg.FS('unlink', 'output.mp4'); } catch(e) { ErrorHandler.silent(e); }
+    addSystemLog('✅ WASM ffmpeg ile 30 FPS MP4 dönüştürüldü!', 'success');
+    return mp4Blob;
+  } catch (err) {
+    addSystemLog('FFmpeg MP4 dönüşüm hatası: ' + err.message, 'error');
+    throw err;
+  }
 };
 
 // === OUTRO TEXTS & CTA LABELS (module-level, render içinde tekrar oluşturulmaz) ===

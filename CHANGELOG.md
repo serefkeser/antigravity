@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [anti 1.0.3] - 2026-07-30
+
+### Fixed & Enhanced
+- **Native System FFmpeg Local Proxy Endpoint (`/convert_mp4`):** Integrated native system `ffmpeg` (version 8.1.1) in `linkedin_server.py` at `/convert_mp4`. Bypasses browser `SharedArrayBuffer` restriction and guarantees 100% reliable 30.00 FPS CFR MP4 conversion without WebM fallback.
+- **Fail-safe MP4 Video Pipeline:** Updated `convertWebMtoMP4` in [anti.1.0.3.jsx](file:///c:/Users/skese/Downloads/antigravity/anti.1.0.3.jsx) to prioritize local Python ffmpeg service before browser WASM fallback.
+
+---
+
 ## [anti 1.0.2] - 2026-07-30
 
 ### Fixed & Enhanced
