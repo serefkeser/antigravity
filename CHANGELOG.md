@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [anti 1.0.13] - 2026-07-30
+
+### Fixed & Enhanced
+- **Automated `app.js` ESBuild Compilation & PWA Cache Invalidation (`anti 1.0.13`):** Compiled [anti.1.0.13.jsx](file:///c:/Users/skese/Downloads/antigravity/anti.1.0.13.jsx) to [app.js](file:///c:/Users/skese/Downloads/antigravity/app.js) via ESBuild so all render pipeline fixes and music selection priority code execute in HTML/PWA builds. Updated [index.html](file:///c:/Users/skese/Downloads/antigravity/index.html) version parameters to `v=1.0.13` and bumped [sw.js](file:///c:/Users/skese/Downloads/antigravity/sw.js) `CACHE_NAME` to `otonom-pwa-v1.0.13` to force immediate browser cache refresh.
+
+---
+
 ## [anti 1.0.12] - 2026-07-30
 
 ### Fixed & Enhanced

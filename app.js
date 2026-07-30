@@ -56,7 +56,7 @@ const APP_VERSION = {
   name: "anti 1.0",
   major: 1,
   minor: 0,
-  patch: 8,
+  patch: 13,
   toString() {
     return `${this.name}.${this.patch}`;
   },
@@ -1781,37 +1781,41 @@ ${contentText}` }];
     }
     const _curMonthYear = _getCurrentMonthYearTR();
     const _curDate = _getCurrentDateTR();
-    const sysPrompt = `Sen T\xFCrkiye ger\xE7eklerine tam hakim, tarafs\u0131z, mutlak do\u011Fruluktan \xF6d\xFCn vermeyen k\u0131demli bir Fact-Check (Do\u011Frulama) ve Ekonomi Analiz Uzman\u0131s\u0131n.
+    const sysPrompt = `Sen T\xFCrkiye ger\xE7eklerine tam hakim, tarafs\u0131z, mutlak do\u011Fruluktan \xF6d\xFCn vermeyen k\u0131demli bir Fact-Check (Do\u011Frulama), Adalet ve Ekonomi Analiz Uzman\u0131s\u0131n.
 
-\u015EU ANDAK\u0130 G\xDCNCEL TAR\u0130H VE D\xD6NEM: ${_curMonthYear} (B\xFCt\xFCn tarih ve d\xF6nem ifadelerinde bu g\xFCncel tarihi kullan).
+\u015EU ANDAK\u0130 G\xDCNCEL TAR\u0130H VE D\xD6NEM: ${_curMonthYear} (B\xFCt\xFCn tarih, istatistik ve kaynak d\xF6nem ifadelerinde bu g\xFCncel tarihi kullan).
 
-ZORUNLU M\u0130SYON VE ANAL\u0130Z KURALLARI:
+ZORUNLU M\u0130SYON VE \u0130DD\u0130A ANAL\u0130Z KURALLARI:
 
 1. B\u0130REB\u0130R VE \xD6ZG\xDCN ANAL\u0130Z (EZBER/KALIP C\xDCMLE YASAKTIR):
-   - Y\xFCklenen girdiyi (metin, g\xF6rsel, video, URL) tamamen birebir ve \xF6zg\xFCn olarak analiz et. S\xFCrekli ayn\u0131 basma kal\u0131p \u015Fablonlar\u0131 tekrarlama.
+   - Y\xFCklenen girdiyi (metin, g\xF6rsel, video, ses, URL) tamamen birebir ve \xF6zg\xFCn olarak analiz et. S\xFCrekli ayn\u0131 basma kal\u0131p \u015Fablonlar\u0131 tekrarlama.
    - \u0130\xE7erikteki DO\u011ERULANAB\u0130L\u0130R iddia ve c\xFCmleleri tek tek \xE7\u0131kar (ki\u015Fisel g\xF6r\xFC\u015F, temenni ve hakaretler hari\xE7). Her iddiay\u0131 ba\u011F\u0131ms\u0131z kart olarak incele.
 
-2. 2002 YILI BAZ ALINARAK TAR\u0130HSEL D\xD6N\xDC\u015E\xDCM KAR\u015EILA\u015ETIRMASI:
-   - \u0130ddia veya analiz konusu ekonomi, al\u0131m g\xFCc\xFC, maa\u015Flar, enflasyon, d\xF6viz kurlar\u0131 veya kamu politikas\u0131 ise; MUTLAKA 2002 YILINDAK\u0130 RESM\u0130 VER\u0130 \u0130LE KIYASLAMA YAP ("2002 y\u0131l\u0131nda X verisi \u015Fu kadard\u0131, g\xFCn\xFCm\xFCz ${_curMonthYear} itibar\u0131yla \u015Fu oldu" \u015Feklinde d\xF6n\xFC\u015F\xFCm\xFC a\xE7\u0131k\xE7a vurgula).
-   - 2002'deki al\u0131m g\xFCc\xFC (\xF6rne\u011Fin ka\xE7 adet \xE7eyrek alt\u0131n al\u0131nabiliyordu, ka\xE7 TL asgari \xFCcretti) ile ${_curMonthYear} g\xFCn\xFCm\xFCzdeki al\u0131m g\xFCc\xFCn\xFC kar\u015F\u0131la\u015Ft\u0131r.
+2. KES\u0130NT\u0130S\u0130Z SES VEYA V\u0130DEO OYNATMA ZORUNLULU\u011EU (H\u0130\xC7B\u0130R YER\u0130 KES\u0130LMEDEN):
+   - Clickbait kapak / hook sahnesinden HEMEN SONRA, y\xFCklenen ses veya video H\u0130\xC7B\u0130R YER\u0130 KES\u0130LMEDEN OLDU\u011EU G\u0130B\u0130 TAM OYNATILMALIDIR!
+   - Orijinal medya eksiksiz olarak dinletildikten/izletildikten HEMEN SONRA detayl\u0131 analiz ve do\u011Frulama a\u015Famas\u0131na ge\xE7ilecektir.
 
-3. T\xDCRK\u0130YE GER\xC7EKLER\u0130 VE RESM\u0130 KAYNAK ZORUNLULU\u011EU:
-   - B\xFCt\xFCn de\u011Ferlendirmelerini T\xFCrkiye'nin reel ya\u015Fam ko\u015Fullar\u0131, T\xDC\u0130K, TCMB, T\xDCRK-\u0130\u015E, Hazine ve Maliye Bakanl\u0131\u011F\u0131, BDDK gibi resmi kurum verileriyle yap.
-   - Analiz metninde ve \xE7\u0131kar\u0131lan kan\u0131tlarda MUTLAKA RESM\u0130 KAYNAK ADINI (T\xDC\u0130K, TCMB, T\xDCRK-\u0130\u015E vb.) ve VER\u0130 TAR\u0130H\u0130N\u0130 (${_curMonthYear}) A\xC7IK\xC7A YAZ. \u0130zleyici okudu\u011Funda ve dinledi\u011Finde %100 tatmin ve ikna olmal\u0131d\u0131r.
+3. YA\u015EANAN SOMUT OLAYLAR, ADALET VE EMSAL \xD6RNEKLERLE \u0130F\u015EA:
+   - Medya dinletildikten/izletildikten sonra, iddiadaki yanl\u0131\u015Flar veya eksikler GER\xC7EKTE YA\u015EANAN SOMUT OLAYLAR, MAHKEME/ADALET KARARLARI, EMSAL VAKALAR VE REEL YA\u015EAM VER\u0130LER\u0130 \xD6RNEK VER\u0130LEREK NET \u015EEK\u0130LDE \u0130F\u015EA ED\u0130LECEKT\u0130R.
+   - Ya\u015Fanan bu somut emsal \xF6rnekler ve veriler \u0131\u015F\u0131\u011F\u0131nda iddia adalet ve ger\xE7eklik s\xFCzgecinden ge\xE7irilip a\xE7\u0131k\xE7a if\u015Fa edilir.
 
-4. MUTLAK DO\u011ERULUK VE \u015EEFFAFLIK (ASLA YALAN YAZMA / B\u0130LM\u0130YORSAN "B\u0130LM\u0130YORUM" DE):
+4. EN G\xDCNCEL DEVLET VE RESM\u0130 KURUM VER\u0130LER\u0130 (${_curMonthYear}) VE 2002 KIYASLAMASI:
+   - De\u011Ferlendirmelerde devletin sundu\u011Fu EN RESM\u0130 VE EN G\xDCNCEL VER\u0130LER (${_curMonthYear} - \xD6rn: Temmuz 2026) esas al\u0131n\u0131r.
+   - \u0130ddia veya analiz konusu ekonomi, al\u0131m g\xFCc\xFC, maa\u015Flar, enflasyon, d\xF6viz kurlar\u0131, adalet veya kamu politikas\u0131 ise; MUTLAKA 2002 y\u0131l\u0131 ve en g\xFCncel devlet verileri (${_curMonthYear}) ile kar\u015F\u0131la\u015Ft\u0131rma yap ("2002 y\u0131l\u0131nda X verisi \u015Fu kadard\u0131, g\xFCn\xFCm\xFCz ${_curMonthYear} itibar\u0131yla \u015Fu oldu" \u015Feklinde d\xF6n\xFC\u015F\xFCm\xFC vurgula).
+
+5. MUTLAKA YAZILACAK RESM\u0130 KAYNAK VE L\u0130NK ZORUNLULU\u011EU:
+   - B\xFCt\xFCn de\u011Ferlendirmelerinde resmi kurum verilerini (T\xDC\u0130K, TCMB, T\xDCRK-\u0130\u015E, Hazine ve Maliye Bakanl\u0131\u011F\u0131, Adalet Bakanl\u0131\u011F\u0131, Resmi Gazete vb.) kullan.
+   - Sahnelerde ve \xE7\u0131kar\u0131lan kan\u0131tlarda MUTLAKA RESM\u0130 KAYNAK ADINI, TAR\u0130H\u0130N\u0130 (${_curMonthYear}) VE VARSA WEB ADRES\u0130N\u0130 (URL) a\xE7\u0131k\xE7a yaz. \u0130zleyici okudu\u011Funda ve dinledi\u011Finde %100 ikna olmal\u0131d\u0131r.
+
+6. MUTLAK DO\u011ERULUK VE \u015EEFFAFLIK (ASLA YALAN YAZMA / B\u0130LM\u0130YORSAN "B\u0130LM\u0130YORUM" DE):
    - Asla tahmini, uydurma, yalan veya do\u011Frulanamayan veri sunma. Daima sadece ger\xE7e\u011Fi s\xF6yle.
    - Resmi kurum verisi bulunmayan, mu\u011Flak veya kan\u0131tlanamayan iddialar i\xE7in \xC7EK\u0130NMEDEN durum etiketini "Do\u011Frulanabiliyor / Veri Yetersiz" olarak belirle ve analiz a\xE7\u0131klamas\u0131nda "Resmi kaynaklarda bu iddiay\u0131 do\u011Frudan do\u011Frulayacak a\xE7\u0131k veri bulunmamaktad\u0131r" de.
 
-5. G\xDCNCEL RESM\u0130 EKONOM\u0130 VE TAR\u0130HSEL BAZ VER\u0130LER\u0130 (${_curMonthYear}):
+7. G\xDCNCEL RESM\u0130 EKONOM\u0130 VE TAR\u0130HSEL BAZ VER\u0130LER\u0130 (${_curMonthYear}):
 ${buildEconomicDataBlock()}
 
-6. G\xD6REV VE \xC7IKTI AKI\u015EI:
-   - \u0130\xE7erikteki do\u011Frulanabilir c\xFCmleleri ay\u0131kla ve her iddia i\xE7in ayr\u0131 bir analiz kart\u0131 olu\u015Ftur.
-   - Durum etiketleri: 'Do\u011Fru', 'K\u0131smen Do\u011Fru', 'Eksik Ba\u011Flam', 'Yanl\u0131\u015F', 'Do\u011Frulanabiliyor / Veri Yetersiz'.
-   - G\xFCven skoru: 0-100 aras\u0131.
-   - Kan\u0131tlar: Resmi Kaynak Ad\u0131 + Tarih (${_curMonthYear}) + Resmi Veri.
-   - Video senaryosu (videoSlides): 5sn Vurucu Hook -> \u0130ddia Metni -> 2002 vs ${_curMonthYear} D\xF6n\xFC\u015F\xFCm Analizi -> Resmi Kan\u0131tlar ve Rakamlar -> Sonu\xE7 \xD6zet.${LogicEngineService._buildSonSozRule()}
+8. G\xD6REV VE V\u0130DEO SENARYO AKI\u015EI (videoSlides):
+   - 5sn Vurucu Clickbait Hook -> Y\xFCklenen Ses veya Videonun Kesintisiz Tam Oynat\u0131m\u0131 -> Ya\u015Fanan Somut Olay / Adalet Emsali / \u0130f\u015Fa \xD6rne\u011Fi -> En G\xFCncel Devlet Verisi (${_curMonthYear}) & 2002 Kar\u015F\u0131la\u015Ft\u0131rmas\u0131 -> Resmi Kaynakl\u0131 Sonu\xE7 ve Kapan\u0131\u015F.${LogicEngineService._buildSonSozRule()}
 
 D\xF6n\xFC\u015F ZORUNLU olarak ge\xE7erli JSON format\u0131nda olmal\u0131d\u0131r.`;
     const payload = {
@@ -2652,8 +2656,7 @@ const RenderWorkerService = {
     const totalDuration = Math.min(audioDuration + bufferTime, maxAllowedDur + bufferTime);
     const totalFrames = Math.round(totalDuration * FPS);
     addSystemLog(`Toplam s\xFCre: ${totalDuration.toFixed(1)}sn (${audioDuration.toFixed(1)}sn ses + ${bufferTime}sn buffer)`, "info");
-    let bgmSource, masterGain;
-    let ambientSound = jobData.preferences.ambientSound || "none";
+    let ambientSound = jobData.preferences?.ambientSound || SafeStorage.getItem("ns_selectedBgmId") || "none";
     if (ambientSound === "none") {
       try {
         const allMusic = await AssetManagerService.getAllMusicFromLib();
@@ -3550,13 +3553,13 @@ const RenderWorkerService = {
       addSystemLog(`Sahne ${isThumbnail ? "kapak" : isOutro ? "kapan\u0131\u015F" : slideIndex} render edildi.`, "success");
     };
     try {
-      let bgmSource, bgmNode, masterGain;
+      let bgmSource2, bgmNode, masterGain2;
       let bgmInitialized = false;
       const loadBGM = async (musicId) => {
-        if (bgmSource) {
+        if (bgmSource2) {
           try {
-            bgmSource.stop();
-            bgmSource.disconnect();
+            bgmSource2.stop();
+            bgmSource2.disconnect();
           } catch (e) {
             ErrorHandler.silent(e);
           }
@@ -3568,27 +3571,27 @@ const RenderWorkerService = {
             ErrorHandler.silent(e);
           }
         }
-        if (masterGain) {
+        if (masterGain2) {
           try {
-            masterGain.disconnect();
+            masterGain2.disconnect();
           } catch (e) {
             ErrorHandler.silent(e);
           }
         }
-        bgmSource = null;
+        bgmSource2 = null;
         bgmNode = null;
-        masterGain = null;
+        masterGain2 = null;
         if (!musicId || musicId === "none") return;
         const ambientTypes = ["rain", "wind", "waves", "fire"];
         if (ambientTypes.includes(musicId)) {
           const ambientObj = AmbientAudioService.getAmbientNode(audioCtx, musicId);
           if (ambientObj) {
-            bgmSource = ambientObj.source;
+            bgmSource2 = ambientObj.source;
             bgmNode = ambientObj.gainNode;
-            masterGain = audioCtx.createGain();
-            masterGain.gain.value = preferences?.backgroundMusicVolume ?? 0.3;
-            bgmNode.connect(masterGain);
-            masterGain.connect(audioDest);
+            masterGain2 = audioCtx.createGain();
+            masterGain2.gain.value = preferences?.backgroundMusicVolume ?? 0.3;
+            bgmNode.connect(masterGain2);
+            masterGain2.connect(audioDest);
           }
         } else {
           try {
@@ -3599,16 +3602,16 @@ const RenderWorkerService = {
               const res = await fetch(musicUrl);
               const buf = await audioCtx.decodeAudioData(await res.arrayBuffer());
               if (!bgmInitialized) {
-                bgmSource = audioCtx.createBufferSource();
-                bgmSource.buffer = buf;
-                bgmSource.loop = true;
+                bgmSource2 = audioCtx.createBufferSource();
+                bgmSource2.buffer = buf;
+                bgmSource2.loop = true;
                 bgmInitialized = true;
               }
-              masterGain = audioCtx.createGain();
-              masterGain.gain.value = preferences?.backgroundMusicVolume ?? 0.3;
-              bgmSource.connect(masterGain);
-              masterGain.connect(audioDest);
-              bgmSource.start(0);
+              masterGain2 = audioCtx.createGain();
+              masterGain2.gain.value = preferences?.backgroundMusicVolume ?? 0.3;
+              bgmSource2.connect(masterGain2);
+              masterGain2.connect(audioDest);
+              bgmSource2.start(0);
             }
           } catch (e) {
             console.warn("M\xFCzik okunamad\u0131", e);
@@ -3826,10 +3829,10 @@ const RenderWorkerService = {
         sysEventBus.emit("PROGRESS", { step: "RENDER", percent: 90, text: "Kapan\u0131\u015F Render Ediliyor..." });
         await renderScene(outroImg, jobData.script.lastQuote, jobData.assets.outroAudio, rawOutroDur, false, true, null, 99, null, jobData.config.transition);
       }
-      if (bgmSource) {
+      if (bgmSource2) {
         try {
-          bgmSource.stop();
-          bgmSource.disconnect();
+          bgmSource2.stop();
+          bgmSource2.disconnect();
         } catch (e) {
           ErrorHandler.silent(e);
         }
@@ -3841,9 +3844,9 @@ const RenderWorkerService = {
           ErrorHandler.silent(e);
         }
       }
-      if (masterGain) {
+      if (masterGain2) {
         try {
-          masterGain.disconnect();
+          masterGain2.disconnect();
         } catch (e) {
           ErrorHandler.silent(e);
         }
@@ -4217,9 +4220,13 @@ class WorkflowCoordinator {
           if (!this.state.assets.thumbnail) this.state.assets.thumbnail = this.state.assets.images[0];
           const allMusic = await AssetManagerService.getAllMusicFromLib();
           if (allMusic.length > 0) {
-            const matchedTrack = matchMusicToEmotion(emotionForImage, allMusic);
-            const chosenTrack = matchedTrack || allMusic[Math.floor(Math.random() * allMusic.length)];
-            addSystemLog(`M\xFCzik se\xE7ildi: ${chosenTrack.name} (duygu: ${emotionForImage})`, "success");
+            const userSelectedId = this.state.preferences?.ambientSound || SafeStorage.getItem("ns_selectedBgmId");
+            let chosenTrack = userSelectedId && userSelectedId !== "none" ? allMusic.find((m) => m.id === userSelectedId) : null;
+            if (!chosenTrack) {
+              const matchedTrack = typeof matchMusicToEmotion === "function" ? matchMusicToEmotion(emotionForImage, allMusic) : null;
+              chosenTrack = matchedTrack || allMusic[Math.floor(Math.random() * allMusic.length)];
+            }
+            addSystemLog(`M\xFCzik belirlendi: ${chosenTrack.name} (Se\xE7ili M\xFCzik Korundu)`, "success");
             this.state.script._bgmId = chosenTrack.id;
             this.state.script._bgmName = chosenTrack.name;
             this.state.preferences.ambientSound = chosenTrack.id;
@@ -6375,7 +6382,7 @@ if (typeof document !== "undefined") {
             try {
               window._reactRoot = ReactDOM.createRoot(rootEl);
             } catch (rootErr) {
-              console.warn("createRoot atlandı (zaten bağlı):", rootErr);
+              console.warn("createRoot atland\u0131 (zaten ba\u011Fl\u0131):", rootErr);
             }
           }
         }
@@ -6390,6 +6397,4 @@ if (typeof document !== "undefined") {
     }
   }
 }
-if (typeof module !== "undefined" && module.exports) {
-  module.exports = App;
-}
+export default App;
