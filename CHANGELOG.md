@@ -1,3 +1,7 @@
+### v1.0.16 (2026-07-30)
+- **feat(iddia-analizi)**: Uploaded media (video/audio) is now played uncut immediately after the hook/clickbait.
+- **fix**: Prevented duplicate media downloads triggered by React Strict Mode.
+
 # Changelog
 
 All notable changes to this project will be documented in this file.
