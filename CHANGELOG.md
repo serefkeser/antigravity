@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [anti 1.0.11] - 2026-07-30
+
+### Fixed & Enhanced
+- **Fixed React Duplicate `createRoot()` & Module Export `undefined` Crash (`anti 1.0.11`):** Resolved `ReactDOMClient.createRoot()` warning and `Element type is invalid: expected a string or class/function but got: undefined` error in [anti.1.0.11.jsx](file:///c:/Users/skese/Downloads/antigravity/anti.1.0.11.jsx) and [app.js](file:///c:/Users/skese/Downloads/antigravity/app.js). Implemented `window._reactRoot` singleton container management and added global `window.App = App` and `export default App` fallbacks for 100% reliable execution across Canvas sandboxes and standalone PWA runners.
+
+---
+
 ## [anti 1.0.10] - 2026-07-30
 
 ### Fixed & Enhanced

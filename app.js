@@ -6361,17 +6361,27 @@ ${scriptObj.tiktokHashtags.join(" ")}` : "";
     return /* @__PURE__ */ React.createElement("div", { key: idx, className: `flex items-start gap-2 ${c}` }, /* @__PURE__ */ React.createElement("span", { className: "text-slate-600 shrink-0 select-none" }, "[", log.timestamp, "]"), /* @__PURE__ */ React.createElement("span", { className: "break-all" }, log.text));
   }), /* @__PURE__ */ React.createElement("div", { ref: logEndRef })))), authExpired && /* @__PURE__ */ React.createElement("div", { className: "fixed inset-0 bg-slate-950/95 backdrop-blur-xl z-[9999] flex items-center justify-center p-4" }, /* @__PURE__ */ React.createElement("div", { className: "bg-slate-900 border-2 border-red-500/40 w-full max-w-md p-8 rounded-3xl shadow-2xl text-center" }, /* @__PURE__ */ React.createElement("h2", { className: "text-2xl font-black text-white mb-3" }, "OTURUM S\xDCRES\u0130 DOLDU"), /* @__PURE__ */ React.createElement("p", { className: "text-slate-400 text-sm mb-6" }, "L\xFCtfen sayfay\u0131 yenileyin."), /* @__PURE__ */ React.createElement("div", { className: "flex flex-col gap-3" }, /* @__PURE__ */ React.createElement("button", { onClick: handleSilentRecovery, className: "w-full bg-gradient-to-r from-emerald-600 to-indigo-600 text-white font-bold py-3 rounded-xl text-sm flex items-center justify-center gap-2" }, /* @__PURE__ */ React.createElement(ShieldCheck, { size: 16 }), " OTURUMU YEN\u0130LE"), /* @__PURE__ */ React.createElement("button", { onClick: () => setAuthExpired(false), className: "w-full bg-slate-800 text-slate-300 font-bold py-3 rounded-xl text-xs" }, "G\xD6ZARDI ET"), /* @__PURE__ */ React.createElement("button", { onClick: () => window.location.reload(), className: "w-full bg-red-600/20 text-red-400 font-bold py-3 rounded-xl text-xs border border-red-500/30" }, "SAYFAYI YEN\u0130LE (F5)")))), /* @__PURE__ */ React.createElement("canvas", { ref: canvasRef, style: { position: "fixed", top: "-10000px", left: "-10000px", zIndex: -50 } })));
 }
+if (typeof window !== "undefined") {
+  window.App = App;
+  window.ErrorBoundary = ErrorBoundary;
+}
 if (typeof document !== "undefined") {
   const rootEl = document.getElementById("root");
   if (rootEl) {
     try {
       if (typeof ReactDOM !== "undefined" && typeof ReactDOM.createRoot === "function") {
-        ReactDOM.createRoot(rootEl).render(/* @__PURE__ */ React.createElement(App, null));
+        if (!window._reactRoot) {
+          window._reactRoot = ReactDOM.createRoot(rootEl);
+        }
+        window._reactRoot.render(/* @__PURE__ */ React.createElement(App, null));
       } else if (typeof ReactDOM !== "undefined" && typeof ReactDOM.render === "function") {
         ReactDOM.render(/* @__PURE__ */ React.createElement(App, null), rootEl);
       }
     } catch (e) {
-      console.error("React mount hatas\u0131:", e);
+      console.warn("React mount uyar\u0131s\u0131:", e);
     }
   }
+}
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = App;
 }
