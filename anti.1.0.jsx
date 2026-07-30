@@ -129,11 +129,12 @@ try {
 
 // ── APP_VERSION: Tek kaynak versiyon yönetimi ──────────────────────────────
 const APP_VERSION = {
-  major: 2,
-  minor: 4,
-  hotfix: 'H2.4',
-  toString() { return `BLACKBOX black_${this.major}.${this.minor}.${this.hotfix}`; },
-  toBadge() { return `${this.toString()} • One-Page`; }
+  name: 'anti 1.0',
+  major: 1,
+  minor: 0,
+  patch: 1,
+  toString() { return `${this.name}.${this.patch}`; },
+  toBadge() { return `${this.name.toUpperCase()}.${this.patch} • Studio`; }
 };
 
 // ── RENDER_CONFIG: Render ile ilgili tüm magic number'lar ──────────────────

@@ -5,9 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [v2.4.H2.4] - 2026-07-30
+## [anti 1.0.1] - 2026-07-30
 
 ### Added
+- **Unified `anti 1.0` Versioning:** Standardized internal and external version numbers to `anti 1.0.x` matching filename (`anti.1.0.jsx`).
 - **Senior Software Engineering Operational Checklist:** Established strict checklist in `.agents/AGENTS.md` enforcing empirical verification, semantic versioning, CHANGELOG logging, and mandatory GitHub synchronization on every task.
 - **Video Keyframe Extraction (`_extractVideoFrame`):** Video uploads now extract keyframes via HTML5 Canvas for multimodal Gemini API analysis to prevent video audio transcription traps.
 
@@ -18,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [v2.3.H2.3] - 2026-07-29
+## [anti 1.0.0] - 2026-07-29
 
 ### Added
 - Dynamic TÜİK & TÜRK-İŞ economic data injection into system prompts (`buildEconomicDataBlock`).

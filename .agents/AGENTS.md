@@ -19,8 +19,8 @@ Before concluding any task involving code changes, you MUST execute every step i
    - Diagnose issues using full tracebacks and empirical evidence (no superficial patches or hiding errors).
    - Test logic locally using Node/runtime verification commands.
 
-2. **Semantic Versioning (`APP_VERSION`):**
-   - Update `APP_VERSION` in [anti.1.0.jsx](file:///c:/Users/skese/Downloads/antigravity/anti.1.0.jsx#L130-L137) (increment hotfix/minor version appropriately).
+2. **Unified Versioning & Auto Increment (`anti 1.0.x`):**
+   - Increment patch/minor version in `APP_VERSION` in [anti.1.0.jsx](file:///c:/Users/skese/Downloads/antigravity/anti.1.0.jsx#L130-L137) (`anti 1.0.x`) on EVERY single code change. Internal version string (`APP_VERSION.toString()`) and external version MUST always match `anti 1.0.x`.
 
 3. **Changelog Maintenance (`CHANGELOG.md`):**
    - Record all additions, fixes, prompt upgrades, and render enhancements in [CHANGELOG.md](file:///c:/Users/skese/Downloads/antigravity/CHANGELOG.md).
