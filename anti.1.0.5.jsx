@@ -132,7 +132,7 @@ const APP_VERSION = {
   name: 'anti 1.0',
   major: 1,
   minor: 0,
-  patch: 4,
+  patch: 5,
   toString() { return `${this.name}.${this.patch}`; },
   toBadge() { return `${this.name.toUpperCase()}.${this.patch} • Studio`; }
 };
@@ -3844,8 +3844,35 @@ class MediaSynthesisService {
                   if (this.state.status === 'READY_TO_RENDER') {
                     await this.updateProgress(80, 'Video Paketleniyor...', 'RENDER');
                     const renderResult = await RenderWorkerService.executeRender(this.state, canvasRef.current, this.state.preferences);
-                    this.state.status = 'COMPLETED'; this.state.videoUrl = typeof renderResult === 'string' ? renderResult : renderResult.url; this.state.videoBlobType = (typeof renderResult === 'object' && renderResult.blobType) ? renderResult.blobType : '';
-                    await AssetManagerService.saveJobState(this.state); await AssetManagerService.clearJob(this.jobId);
+                    
+                    let finalVideoUrl = typeof renderResult === 'string' ? renderResult : renderResult.url;
+                    let finalBlobType = (typeof renderResult === 'object' && renderResult.blobType) ? renderResult.blobType : 'video/webm';
+                    
+                    // ZORUNLU MP4 DÖNÜŞÜMÜ: Eğer çıktı resim değilse (Varsayılan Her Zaman 30 FPS MP4)
+                    if (this.state.config.outputType !== 'image') {
+                      try {
+                        await this.updateProgress(92, 'Instagram Uyumlu 30 FPS MP4 Dönüştürülüyor...', 'RENDER');
+                        addSystemLog('Video MP4 formatına dönüştürülüyor (0.5 sn)...', 'info');
+                        const resp = await fetch(finalVideoUrl);
+                        const webmBlob = await resp.blob();
+                        const mp4Blob = await convertWebMtoMP4(webmBlob, (pct) => {
+                          this.updateProgress(92 + Math.round(pct * 0.07), `MP4 dönüştürme %${pct}...`, 'RENDER');
+                        });
+                        if (mp4Blob && mp4Blob.size > 0) {
+                          finalVideoUrl = ObjectURLManager.create(mp4Blob);
+                          finalBlobType = 'video/mp4';
+                          addSystemLog('✅ Video BAŞARIYLA 30 FPS MP4 FORMATINA DÖNÜŞTÜRÜLDÜ!', 'success');
+                        }
+                      } catch (mp4Err) {
+                        addSystemLog('MP4 dönüştürme uyarısı: ' + mp4Err.message, 'warn');
+                      }
+                    }
+
+                    this.state.status = 'COMPLETED';
+                    this.state.videoUrl = finalVideoUrl;
+                    this.state.videoBlobType = finalBlobType;
+                    await AssetManagerService.saveJobState(this.state);
+                    await AssetManagerService.clearJob(this.jobId);
                     sysEventBus.emit('WORKFLOW_STATE', { status: 'COMPLETED', job: this.state });
                     return this.state.videoUrl;
                   }

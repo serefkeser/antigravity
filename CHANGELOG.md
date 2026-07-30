@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [anti 1.0.5] - 2026-07-30
+
+### Fixed & Enhanced
+- **Mandatory Automatic MP4 Conversion in Workflow:** Integrated automatic MP4 conversion at 92% progress inside `WorkflowCoordinator.resumeWorkflow` in [anti.1.0.5.jsx](file:///c:/Users/skese/Downloads/antigravity/anti.1.0.5.jsx). Automatically converts raw canvas WebM output to 30 FPS H.264/AAC MP4 via native FFmpeg before workflow completion so `videoUrl` is GUARANTEED to be a true `.mp4` file (never `.webm`).
+
+---
+
 ## [anti 1.0.4] - 2026-07-30
 
 ### Fixed & Enhanced
