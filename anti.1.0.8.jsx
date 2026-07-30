@@ -62,7 +62,8 @@
 //   - gazete-proxy.js: generateSelfSignedCert() dead code temizlendi
 //   - Windows otomatik başlatma (Startup + VBS silent launcher)
 
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+const React = (typeof window !== 'undefined' && window.React) ? window.React : (typeof globalThis !== 'undefined' && globalThis.React) ? globalThis.React : {};
+const { useState, useRef, useEffect, useCallback } = React;
 
 // ============================================================================
 // SVG ICON SYSTEM (lucide-react yerine - Gemini Canvas uyumluluğu)
