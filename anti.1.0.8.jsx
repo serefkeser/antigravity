@@ -132,7 +132,7 @@ const APP_VERSION = {
   name: 'anti 1.0',
   major: 1,
   minor: 0,
-  patch: 7,
+  patch: 8,
   toString() { return `${this.name}.${this.patch}`; },
   toBadge() { return `${this.name.toUpperCase()}.${this.patch} • Studio`; }
 };
@@ -5879,5 +5879,18 @@ class ErrorBoundary extends React.Component {
             }
 
 
-// OTONOM black_2.2 — Gemini Canvas uyumlu versiyon
-// Tüm fonksiyonlar tek dosyada, kopyala-yapıştır ile Canvas'ta çalışır.
+// ── App Mount: Standalone & PWA Desteği ───────────────────────────────────
+if (typeof document !== 'undefined') {
+  const rootEl = document.getElementById('root');
+  if (rootEl) {
+    try {
+      if (typeof ReactDOM !== 'undefined' && typeof ReactDOM.createRoot === 'function') {
+        ReactDOM.createRoot(rootEl).render(<App />);
+      } else if (typeof ReactDOM !== 'undefined' && typeof ReactDOM.render === 'function') {
+        ReactDOM.render(<App />, rootEl);
+      }
+    } catch (e) {
+      console.error("React mount hatası:", e);
+    }
+  }
+}

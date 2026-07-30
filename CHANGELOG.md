@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [anti 1.0.8] - 2026-07-30
+
+### Fixed & Enhanced
+- **Fixed Standalone Tablet / Mobile Blank Screen Issue (ReactDOM Mount Fix):** Resolved black screen issue on mobile browsers and tablets in [anti.1.0.8.jsx](file:///c:/Users/skese/Downloads/antigravity/anti.1.0.8.jsx). Added automatic `ReactDOM.createRoot(document.getElementById('root')).render(<App />)` mounting logic at the bottom of the script and updated [index.html](file:///c:/Users/skese/Downloads/antigravity/index.html) with a fallback animated loading indicator.
+
+---
+
 ## [anti 1.0.7] - 2026-07-30
 
 ### Fixed & Enhanced

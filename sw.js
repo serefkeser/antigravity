@@ -1,11 +1,11 @@
-const CACHE_NAME = 'otonom-pwa-v1.0.7';
+const CACHE_NAME = 'otonom-pwa-v1.0.8';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
-  './anti.1.0.7.jsx'
+  './anti.1.0.8.jsx'
 ];
 
 self.addEventListener('install', (event) => {
