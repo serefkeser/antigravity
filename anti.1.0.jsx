@@ -213,7 +213,16 @@ const ERROR_PATTERNS = [
   /metin\s+bulunamadı/i,
   /cannot\s+(read|find|detect)\s+text/i,
   /ocr\s+(failed|error|başarısız)/i,
-  /bu\s+resimde\s+yazı\s+yok/i
+  /bu\s+resimde\s+yazı\s+yok/i,
+  /otomatik\s+çözümleme/i,
+  /metin\s+analizi\s+sistemimiz/i,
+  /desteklenmeyen\s+bir\s+format/i,
+  /içeriği\s+ayrıştırılamadı/i,
+  /ses\s+veya\s+konuşma\s+dili/i,
+  /video.*içeriğindeki.*ses/i,
+  /unsupported\s+format/i,
+  /cannot\s+parse/i,
+  /audio\s+track\s+not\s+supported/i
 ];
 
 
@@ -825,6 +834,31 @@ const _splitIntoStrips = (srcB64, stripCount) => {
       img.src = 'data:image/jpeg;base64,' + srcB64;
     });
 };
+
+const _extractVideoFrame = (videoFile) => new Promise((resolve) => {
+  if (!videoFile || !videoFile.data) return resolve(null);
+  try {
+    const video = document.createElement('video');
+    video.muted = true;
+    video.playsInline = true;
+    const raw = videoFile.data.includes(',') ? videoFile.data.split(',')[1] : videoFile.data;
+    const blob = _base64ToBlob(raw, videoFile.type || 'video/mp4');
+    video.src = ObjectURLManager.create(blob);
+    video.onloadeddata = () => { video.currentTime = Math.min(1, (video.duration || 10) * 0.1); };
+    video.onseeked = () => {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth || 640;
+        canvas.height = video.videoHeight || 480;
+        canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+        ObjectURLManager.revoke(video.src);
+        resolve(canvas.toDataURL('image/jpeg', 0.9).split(',')[1]);
+      } catch (e) { ObjectURLManager.revoke(video.src); resolve(null); }
+    };
+    video.onerror = () => { ObjectURLManager.revoke(video.src); resolve(null); };
+    setTimeout(() => { ObjectURLManager.revoke(video.src); resolve(null); }, 10000);
+  } catch (e) { resolve(null); }
+});
 
 const _ocrCall = async (imageB64, prompt, model, imgType, apiKey) => {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
@@ -1535,8 +1569,18 @@ Dönüş ZORUNLU olarak JSON formatında olmalı.`;
     let parts = [];
     if (inputType === 'media' && Array.isArray(inputData)) {
       parts = inputData.map(function(file) { const b64 = file.data.split(',')[1]; return { inlineData: { mimeType: file.type || 'application/octet-stream', data: b64 } }; });
-      const isVideo = inputData.some(function(f) { return f.type && f.type.startsWith('video'); });
-      parts.unshift({ text: isVideo ? 'Bu videoyu izle. İçindeki doğrulanabilir iddiaları çıkar.' : 'Bu görseli incele. İçindeki doğrulanabilir iddiaları çıkar.' });
+      const videoFile = inputData.find(function(f) { return f.type && f.type.startsWith('video'); });
+      if (videoFile) {
+        addSystemLog('Videodan kare çıkarılıyor...', 'info');
+        const frameB64 = await _extractVideoFrame(videoFile);
+        if (frameB64) {
+          parts.push({ inlineData: { mimeType: 'image/jpeg', data: frameB64 } });
+          addSystemLog('Videodan kare çıkarıldı ve analize eklendi.', 'success');
+        }
+        parts.unshift({ text: 'Bu videoyu izle ve görsellerini incele. İçindeki doğrulanabilir iddiaları çıkar.' });
+      } else {
+        parts.unshift({ text: 'Bu görseli incele. İçindeki doğrulanabilir iddiaları çıkar.' });
+      }
     } else if (inputType === 'prompt' || inputType === 'text') {
       parts = [{ text: 'Aşağıdaki metindeki doğrulanabilir iddiaları çıkar: ' + (typeof inputData === 'string' ? inputData : '') }];
     } else if (inputType === 'url') {
@@ -1611,7 +1655,13 @@ Dönüş ZORUNLU olarak geçerli JSON formatında olmalıdır.`;
       tools: [{ google_search: {} }]
     };
     const parsedData = await _callGeminiAndParse(url, payload);
-    if (parsedData.isContentUnreadable) throw new Error('İçerik okunamadı.');
+    const hasErrorText = (parsedData.videoSlides || []).some(s => ERROR_PATTERNS.some(p => p.test(s.spokenText || '') || p.test(s.topText || ''))) ||
+                          (parsedData.iddialar || []).some(i => ERROR_PATTERNS.some(p => p.test(i.iddia || '') || p.test(i.analiz || '')));
+
+    if (parsedData.isContentUnreadable || hasErrorText) {
+      addSystemLog('Video/medya içerisindeki ses veya metin yapay zeka tarafından ayrıştırılamadı.', 'warn');
+      throw new Error('Yüklenen videodaki ses veya metin yapay zeka tarafından doğrudan okunamadı. Lütfen araştırılacak iddiayı metin olarak yazın veya net bir haber görseli yükleyin.');
+    }
     addSystemLog('İddia Analizi tamamlandı: ' + (parsedData.iddialar ? parsedData.iddialar.length : 0) + ' iddia.', 'success');
     return parsedData;
   }
