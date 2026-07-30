@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [anti 1.0.10] - 2026-07-30
+
+### Fixed & Enhanced
+- **Claim Analysis Workflow & Uncut Media Rules (`anti 1.0.10`):** Updated `_analyzeIddia` in [anti.1.0.10.jsx](file:///c:/Users/skese/Downloads/antigravity/anti.1.0.10.jsx). Enforced full, uncut audio/video playback immediately following clickbait hook covers. Integrated real-life case examples, justice/court precedents, concrete exposure evidence, and mandatory official state metrics (July 2026 dataset with source URLs & dates).
+
+---
+
 ## [anti 1.0.9] - 2026-07-30
 
 ### Fixed & Enhanced
