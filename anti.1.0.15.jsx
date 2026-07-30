@@ -477,6 +477,7 @@ const _suspendAudioCtx = () => {
 class EventBus {
   constructor() { this.listeners = {}; }
   on(event, callback) { if (!this.listeners[event]) this.listeners[event] = []; this.listeners[event].push(callback); }
+  off(event, callback) { if (this.listeners[event]) this.listeners[event] = this.listeners[event].filter(cb => cb !== callback); }
   emit(event, data) { if (this.listeners[event]) this.listeners[event].forEach(cb => cb(data)); }
 }
 const sysEventBus = new EventBus();
@@ -4765,20 +4766,34 @@ class ErrorBoundary extends React.Component {
               useEffect(() => { let interval; if (uiState.isProcessing) { setElapsedSeconds(0); const start = performance.now(); interval = setInterval(() => { setElapsedSeconds(((performance.now() - start) / 1000).toFixed(1)); }, 100); } else clearInterval(interval); return () => clearInterval(interval); }, [uiState.isProcessing]);
 
               useEffect(() => {
-                  sysEventBus.on('SYS_LOG_ADD', (log) => setSysLogs(prev => [...prev, log]));
-                  sysEventBus.on('SYS_LOG_CLEAR', () => sysEventBus.emit('SYS_LOG_CLEAR_DONE'));
-                  sysEventBus.on('SYS_LOG_CLEAR_DONE', () => setSysLogs([]));
-                  sysEventBus.on('PROGRESS', (data) => { const p = Math.min(100, Math.max(0, Math.round(data.percent || 0))); setUiState(prev => ({ ...prev, percent: p, statusText: data.text || prev.statusText })); });
-                  sysEventBus.on('WORKFLOW_STATE', (data) => {
-                      if (data.status === 'FAILED') setUiState(prev => ({ ...prev, isProcessing: false, error: data.job.error }));
-                      if (data.status === 'COMPLETED') {
-                        setUiState(prev => ({ ...prev, isProcessing: false, percent: 100, statusText: 'Tamamlandı!', videoUrl: data.job.videoUrl }));
-                        // Otomatik video + log indir (H1.139)
-                        autoSaveVideo(data.job.videoUrl, data.job.script?.thumbnailText || 'video', data.job.config?.videoFormat);
-                        try { exportWorkflowLog(data.job); } catch (e) { console.warn('Log export hatası:', e); }
-                      }
-                    });
-                  sysEventBus.on('AUTH_EXPIRED', () => setAuthExpired(true));
+                  const onLog = (log) => setSysLogs(prev => [...prev, log]);
+                  const onClear = () => sysEventBus.emit('SYS_LOG_CLEAR_DONE');
+                  const onClearDone = () => setSysLogs([]);
+                  const onProgress = (data) => { const p = Math.min(100, Math.max(0, Math.round(data.percent || 0))); setUiState(prev => ({ ...prev, percent: p, statusText: data.text || prev.statusText })); };
+                  const onWorkflowState = (data) => {
+                    if (data.status === 'FAILED') setUiState(prev => ({ ...prev, isProcessing: false, error: data.job.error }));
+                    if (data.status === 'COMPLETED') {
+                      setUiState(prev => ({ ...prev, isProcessing: false, percent: 100, statusText: 'Tamamlandı!', videoUrl: data.job.videoUrl }));
+                      autoSaveVideo(data.job.videoUrl, data.job.script?.thumbnailText || 'video', data.job.config?.videoFormat);
+                      try { exportWorkflowLog(data.job); } catch (e) { console.warn('Log export hatası:', e); }
+                    }
+                  };
+                  const onAuthExpired = () => setAuthExpired(true);
+                  sysEventBus.on('SYS_LOG_ADD', onLog);
+                  sysEventBus.on('SYS_LOG_CLEAR', onClear);
+                  sysEventBus.on('SYS_LOG_CLEAR_DONE', onClearDone);
+                  sysEventBus.on('PROGRESS', onProgress);
+                  sysEventBus.on('WORKFLOW_STATE', onWorkflowState);
+                  sysEventBus.on('AUTH_EXPIRED', onAuthExpired);
+                  // React 18 Strict Mode double-mount koruması: cleanup ile listener'ları kaldır
+                  return () => {
+                    sysEventBus.off('SYS_LOG_ADD', onLog);
+                    sysEventBus.off('SYS_LOG_CLEAR', onClear);
+                    sysEventBus.off('SYS_LOG_CLEAR_DONE', onClearDone);
+                    sysEventBus.off('PROGRESS', onProgress);
+                    sysEventBus.off('WORKFLOW_STATE', onWorkflowState);
+                    sysEventBus.off('AUTH_EXPIRED', onAuthExpired);
+                  };
                 }, []);
 
               useEffect(() => { if (logEndRef.current) logEndRef.current.scrollIntoView({ behavior: 'smooth' }); }, [sysLogs]);
