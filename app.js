@@ -1,5 +1,5 @@
 (() => {
-  // anti.1.0.15.jsx
+  // anti.1.0.17.jsx
   var React = typeof window !== "undefined" && window.React ? window.React : typeof globalThis !== "undefined" && globalThis.React ? globalThis.React : {};
   var { useState, useRef, useEffect, useCallback } = React;
   var ICONS = {
@@ -57,7 +57,7 @@
     name: "anti 1.0",
     major: 1,
     minor: 0,
-    patch: 15,
+    patch: 17,
     toString() {
       return `${this.name}.${this.patch}`;
     },
@@ -398,11 +398,6 @@
     const now = /* @__PURE__ */ new Date();
     const months = ["Ocak", "\u015Eubat", "Mart", "Nisan", "May\u0131s", "Haziran", "Temmuz", "A\u011Fustos", "Eyl\xFCl", "Ekim", "Kas\u0131m", "Aral\u0131k"];
     return months[now.getMonth()] + " " + now.getFullYear();
-  };
-  var _getCurrentDateTR = () => {
-    const now = /* @__PURE__ */ new Date();
-    const months = ["Ocak", "\u015Eubat", "Mart", "Nisan", "May\u0131s", "Haziran", "Temmuz", "A\u011Fustos", "Eyl\xFCl", "Ekim", "Kas\u0131m", "Aral\u0131k"];
-    return now.getDate() + " " + months[now.getMonth()] + " " + now.getFullYear();
   };
   var getDurationBounds = (dur) => {
     if (dur === "15") return { min: 15, max: 30 };
@@ -1675,7 +1670,6 @@ ${contentText}` }];
         parts = [{ text: "Bu URL icindeki icerigi oku. Dogrulanabilir iddialari cikar: " + inputData }];
       }
       const _curMonthYear = _getCurrentMonthYearTR();
-      const _curDate = _getCurrentDateTR();
       const sysPrompt = `Sen T\xFCrkiye ger\xE7eklerine tam hakim, tarafs\u0131z, mutlak do\u011Fruluktan \xF6d\xFCn vermeyen k\u0131demli bir Fact-Check (Do\u011Frulama), Adalet ve Ekonomi Analiz Uzman\u0131s\u0131n.
 
 \u015EU ANDAK\u0130 G\xDCNCEL TAR\u0130H VE D\xD6NEM: ${_curMonthYear} (B\xFCt\xFCn tarih, istatistik ve kaynak d\xF6nem ifadelerinde bu g\xFCncel tarihi kullan).
@@ -1712,6 +1706,12 @@ ${buildEconomicDataBlock()}
 8. G\xD6REV VE V\u0130DEO SENARYO AKI\u015EI (videoSlides):
    - 5sn Vurucu Clickbait Hook -> \u0130kinci sahnede \`playOriginalMedia: true\` (Y\xFCklenen Ses veya Videonun Kesintisiz Tam Oynat\u0131m\u0131) -> \xDC\xE7\xFCnc\xFC sahnede Ya\u015Fanan Somut Olay / Adalet Emsali / \u0130f\u015Fa \xD6rne\u011Fi -> En G\xFCncel Devlet Verisi (${_curMonthYear}) & 2002 Kar\u015F\u0131la\u015Ft\u0131rmas\u0131 -> Resmi Kaynakl\u0131 Sonu\xE7 ve Kapan\u0131\u015F.${_LogicEngineService._buildSonSozRule()}
 
+9. META-PROMPT VE BET\u0130MLEME SIZINTISI YASAKTIR:
+   - \`spokenText\` \u0130\xC7\u0130NE KES\u0130NL\u0130KLE G\xD6RSEL TANIMLAMALARI, '...video ba\u015Fl\u0131\u011F\u0131', 'ekranda yer alan kimlik ve g\xF6rev bilgisi', 'montaj\u0131 ile ironik' G\u0130B\u0130 YAPAY ZEKA TANIMLAMA MET\u0130NLER\u0130N\u0130 YA DA PROMPT C\xDCMLELER\u0130N\u0130 YAZMA!
+   - \`spokenText\` SADECE VE SADECE \u0130ZLEY\u0130C\u0130YE H\u0130TABEN OKUNACAK DO\u011EAL, D\u0130L B\u0130LG\u0130S\u0130 KURALLARINA UYGUN HABER/ANAL\u0130Z D\u0130\u011EER DI\u015E SES C\xDCMLELER\u0130NDEN OLU\u015EMALIDIR.
+
+10. \u0130K\u0130NC\u0130 SLAYTTA (index 1) \`playOriginalMedia: true\` YAP VE \`spokenText\` \u0130\xC7ER\u0130\u011E\u0130N\u0130 KES\u0130NL\u0130KLE BO\u015E MET\u0130N "" YAP! BU SAHNE Y\xDCKLENEN OR\u0130J\u0130NAL KANIT MEDYASININ KES\u0130NT\u0130S\u0130Z \xC7ALINMASI \u0130\xC7\u0130ND\u0130R.
+
 D\xF6n\xFC\u015F ZORUNLU olarak ge\xE7erli JSON format\u0131nda olmal\u0131d\u0131r.`;
       const payload = {
         contents: [{ role: "user", parts }],
@@ -1744,6 +1744,25 @@ D\xF6n\xFC\u015F ZORUNLU olarak ge\xE7erli JSON format\u0131nda olmal\u0131d\u01
       };
       const parsedData = await _callGeminiAndParse(url, payload);
       if (parsedData.sonSoz) _LogicEngineService.addRecentSonSoz(parsedData.sonSoz);
+      if (parsedData.videoSlides && parsedData.videoSlides.length > 0) {
+        parsedData.videoSlides.forEach((slide) => {
+          if (slide.spokenText) {
+            slide.spokenText = slide.spokenText.replace(/.*(video başlığı|ekranda yer alan|kimlik ve görev bilgisi|görsel betimlemesi|prompt|montajı ile ironik|teknik betimleme).*/gi, "").trim();
+          }
+        });
+        if (parsedData.videoSlides.length >= 2) {
+          parsedData.videoSlides[1].playOriginalMedia = true;
+          parsedData.videoSlides[1].spokenText = "";
+          parsedData.videoSlides[1].topText = "OR\u0130J\u0130NAL KAYIT";
+        } else {
+          parsedData.videoSlides.splice(1, 0, {
+            topText: "OR\u0130J\u0130NAL KAYIT",
+            spokenText: "",
+            playOriginalMedia: true,
+            imagePrompts: ["Original Media Playback"]
+          });
+        }
+      }
       const hasErrorText = (parsedData.videoSlides || []).some((s) => ERROR_PATTERNS.some((p) => p.test(s.spokenText || "") || p.test(s.topText || ""))) || (parsedData.iddialar || []).some((i) => ERROR_PATTERNS.some((p) => p.test(i.iddia || "") || p.test(i.analiz || "")));
       if (parsedData.isContentUnreadable || hasErrorText) {
         addSystemLog("Video/medya i\xE7erisindeki ses veya metin yapay zeka taraf\u0131ndan ayr\u0131\u015Ft\u0131r\u0131lamad\u0131.", "warn");
@@ -2848,7 +2867,7 @@ Rules:
       };
       let rawKapakDur = jobData.assets.thumbnailAudio ? getAudioDur(jobData.assets.thumbnailAudio, jobData.script.thumbnailText) : 1;
       let rawSonSozDur = jobData.script.sonSoz ? getAudioDur(jobData.assets.sonSozAudio, jobData.script.sonSoz) : 0;
-      let rawOutroDur = Math.max(4, getAudioDur(jobData.assets.outroAudio, jobData.script.lastQuote));
+      let rawOutroDur = Math.min(2.5, Math.max(1.5, getAudioDur(jobData.assets.outroAudio, jobData.script.lastQuote)));
       let rawSlideSecs = jobData.script.videoSlides.map((s, i) => getAudioDur(jobData.assets.audio[i], s.spokenText));
       let rawCushion = 1e-3;
       let totalNaturalSec = rawKapakDur + rawSonSozDur + rawOutroDur + rawCushion + rawSlideSecs.reduce((a, b) => a + b, 0);
@@ -6334,5 +6353,5 @@ ${scriptObj.tiktokHashtags.join(" ")}` : "";
       }
     }
   }
-  var anti_1_0_15_default = App;
+  var anti_1_0_17_default = App;
 })();

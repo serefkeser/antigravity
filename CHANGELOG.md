@@ -1,3 +1,9 @@
+### v1.0.17 (2026-07-30)
+- **fix(iddia-analizi)**: Meta-prompting / yapay zeka betimleme sızıntıları (spokenText) engellendi.
+- **fix(iddia-analizi)**: Yüklenen medyanın 2. slaytta kesintisiz oynatılması programlama seviyesinde garanti altına alındı.
+- **fix(render)**: Bitiş ekranı (Outro) süresi maksimum 2.5 saniye ile sınırlandırıldı.
+- **fix(visual)**: Görsel ve metinlerde dilbilgisi ve akış kuralları sıkılaştırıldı.
+
 ### v1.0.16 (2026-07-30)
 - **feat(iddia-analizi)**: Uploaded media (video/audio) is now played uncut immediately after the hook/clickbait.
 - **fix**: Prevented duplicate media downloads triggered by React Strict Mode.

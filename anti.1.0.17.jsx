@@ -133,7 +133,7 @@ const APP_VERSION = {
   name: 'anti 1.0',
   major: 1,
   minor: 0,
-  patch: 16,
+  patch: 17,
   toString() { return `${this.name}.${this.patch}`; },
   toBadge() { return `${this.name.toUpperCase()}.${this.patch} • Studio`; }
 };
@@ -1647,10 +1647,7 @@ Dönüş ZORUNLU olarak JSON formatında olmalı.`;
       parts = [{ text: 'Bu URL icindeki icerigi oku. Dogrulanabilir iddialari cikar: ' + inputData }];
     }
 
-    // v2.4: Rakamlar artik ECONOMIC_DATA'dan geliyor (tek kaynak), string-replace
-    // hack'i kaldirildi. Tarih placeholder'lari gercekten dinamik.
     const _curMonthYear = _getCurrentMonthYearTR();
-    const _curDate = _getCurrentDateTR();
     const sysPrompt = `Sen Türkiye gerçeklerine tam hakim, tarafsız, mutlak doğruluktan ödün vermeyen kıdemli bir Fact-Check (Doğrulama), Adalet ve Ekonomi Analiz Uzmanısın.
 
 ŞU ANDAKİ GÜNCEL TARİH VE DÖNEM: ${_curMonthYear} (Bütün tarih, istatistik ve kaynak dönem ifadelerinde bu güncel tarihi kullan).
@@ -1687,6 +1684,12 @@ ${buildEconomicDataBlock()}
 8. GÖREV VE VİDEO SENARYO AKIŞI (videoSlides):
    - 5sn Vurucu Clickbait Hook -> İkinci sahnede \`playOriginalMedia: true\` (Yüklenen Ses veya Videonun Kesintisiz Tam Oynatımı) -> Üçüncü sahnede Yaşanan Somut Olay / Adalet Emsali / İfşa Örneği -> En Güncel Devlet Verisi (${_curMonthYear}) & 2002 Karşılaştırması -> Resmi Kaynaklı Sonuç ve Kapanış.${LogicEngineService._buildSonSozRule()}
 
+9. META-PROMPT VE BETİMLEME SIZINTISI YASAKTIR:
+   - \`spokenText\` İÇİNE KESİNLİKLE GÖRSEL TANIMLAMALARI, '...video başlığı', 'ekranda yer alan kimlik ve görev bilgisi', 'montajı ile ironik' GİBİ YAPAY ZEKA TANIMLAMA METİNLERİNİ YA DA PROMPT CÜMLELERİNİ YAZMA!
+   - \`spokenText\` SADECE VE SADECE İZLEYİCİYE HİTABEN OKUNACAK DOĞAL, DİL BİLGİSİ KURALLARINA UYGUN HABER/ANALİZ DİĞER DIŞ SES CÜMLELERİNDEN OLUŞMALIDIR.
+
+10. İKİNCİ SLAYTTA (index 1) \`playOriginalMedia: true\` YAP VE \`spokenText\` İÇERİĞİNİ KESİNLİKLE BOŞ METİN "" YAP! BU SAHNE YÜKLENEN ORİJİNAL KANIT MEDYASININ KESİNTİSİZ ÇALINMASI İÇİNDİR.
+
 Dönüş ZORUNLU olarak geçerli JSON formatında olmalıdır.`;
 
     const payload = {
@@ -1720,6 +1723,32 @@ Dönüş ZORUNLU olarak geçerli JSON formatında olmalıdır.`;
     };
     const parsedData = await _callGeminiAndParse(url, payload);
     if (parsedData.sonSoz) LogicEngineService.addRecentSonSoz(parsedData.sonSoz);
+
+    // Post-processing: Metatext / Prompt Temizleme ve Orijinal Medya Slide Garantisi
+    if (parsedData.videoSlides && parsedData.videoSlides.length > 0) {
+      parsedData.videoSlides.forEach((slide) => {
+        if (slide.spokenText) {
+          slide.spokenText = slide.spokenText
+            .replace(/.*(video başlığı|ekranda yer alan|kimlik ve görev bilgisi|görsel betimlemesi|prompt|montajı ile ironik|teknik betimleme).*/gi, '')
+            .trim();
+        }
+      });
+
+      // İkinci slaytta (index 1) orijinal medyanın çalınmasını garanti et
+      if (parsedData.videoSlides.length >= 2) {
+        parsedData.videoSlides[1].playOriginalMedia = true;
+        parsedData.videoSlides[1].spokenText = "";
+        parsedData.videoSlides[1].topText = "ORİJİNAL KAYIT";
+      } else {
+        parsedData.videoSlides.splice(1, 0, {
+          topText: 'ORİJİNAL KAYIT',
+          spokenText: '',
+          playOriginalMedia: true,
+          imagePrompts: ['Original Media Playback']
+        });
+      }
+    }
+
     const hasErrorText = (parsedData.videoSlides || []).some(s => ERROR_PATTERNS.some(p => p.test(s.spokenText || '') || p.test(s.topText || ''))) ||
                           (parsedData.iddialar || []).some(i => ERROR_PATTERNS.some(p => p.test(i.iddia || '') || p.test(i.analiz || '')));
 
@@ -2615,7 +2644,7 @@ class MediaSynthesisService {
 
         let rawKapakDur = jobData.assets.thumbnailAudio ? getAudioDur(jobData.assets.thumbnailAudio, jobData.script.thumbnailText) : 1.0;
         let rawSonSozDur = jobData.script.sonSoz ? getAudioDur(jobData.assets.sonSozAudio, jobData.script.sonSoz) : 0;
-        let rawOutroDur = Math.max(4.0, getAudioDur(jobData.assets.outroAudio, jobData.script.lastQuote)); // 0 boşluk — kesintisiz geçiş
+        let rawOutroDur = Math.min(2.5, Math.max(1.5, getAudioDur(jobData.assets.outroAudio, jobData.script.lastQuote))); // Maksimum 2.5 saniye Outro süresi
         let rawSlideSecs = jobData.script.videoSlides.map((s, i) => getAudioDur(jobData.assets.audio[i], s.spokenText)); // 0.0 — sahne arası boşluk yok
         let rawCushion = 0.001; // Minimum cushion — video sonu sessizlik yok
         let totalNaturalSec = rawKapakDur + rawSonSozDur + rawOutroDur + rawCushion + rawSlideSecs.reduce((a, b) => a + b, 0);
