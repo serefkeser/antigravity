@@ -2643,7 +2643,10 @@ class MediaSynthesisService {
         const videoTrack = stream.getVideoTracks()[0];
         const audioTracks = audioDest ? audioDest.stream.getAudioTracks() : [];
         const combinedStream = new MediaStream([...stream.getVideoTracks(), ...audioTracks]);
-        let mimeType = 'video/webm; codecs="vp8, opus"';
+        // Medya Kayıt Formatı: Önce native MP4 dene (Chrome 130+/Edge/Safari), yoksa WebM
+        let mimeType = 'video/mp4; codecs="avc1.42E01E, mp4a.40.2"';
+        if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/mp4';
+        if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/webm; codecs="vp8, opus"';
         if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/webm';
 
         const playAudio = async (audioData, requestedDuration = null, fallbackText = "") => {
