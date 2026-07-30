@@ -132,7 +132,7 @@ const APP_VERSION = {
   name: 'anti 1.0',
   major: 1,
   minor: 0,
-  patch: 3,
+  patch: 4,
   toString() { return `${this.name}.${this.patch}`; },
   toBadge() { return `${this.name.toUpperCase()}.${this.patch} • Studio`; }
 };
@@ -3103,6 +3103,7 @@ class MediaSynthesisService {
             ctx.restore();
             globalRenderedSec += 1 / FPS; if (videoTrack && videoTrack.requestFrame) videoTrack.requestFrame(); await nextFrame();
           }
+          if (audioEndPromise) await audioEndPromise;
           // Sahne bitti — anında sonraki sahneye geç (sessiz bekleme yok)
           addSystemLog(`Sahne ${isThumbnail ? 'kapak' : isOutro ? 'kapanış' : slideIndex} render edildi.`, 'success');
         };

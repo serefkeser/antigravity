@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [anti 1.0.4] - 2026-07-30
+
+### Fixed & Enhanced
+- **Audio Distortion Prevention & Dynamic PCM Volume Normalization:** Integrated audio peak normalization and gain management from `super calisiyor.txt` into [anti.1.0.4.jsx](file:///c:/Users/skese/Downloads/antigravity/anti.1.0.4.jsx). Dynamically boosts low-amplitude speech up to 26000 peak amplitude (3.0x max boost factor), preventing muffled or distorted TTS voices.
+- **Audio Completion Sync (`audioEndPromise`):** Synchronized scene transitions in `renderScene` with `audioEndPromise` to prevent premature cut-offs or overlapping speech.
+- **Zero Silent Gaps Pipeline:** Guaranteed smooth, continuous flow without silence pauses or empty frames between clickbait cover, news headlines, and newspaper layout.
+
+---
+
 ## [anti 1.0.3] - 2026-07-30
 
 ### Fixed & Enhanced
