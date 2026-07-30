@@ -130,9 +130,9 @@ try {
 // ── APP_VERSION: Tek kaynak versiyon yönetimi ──────────────────────────────
 const APP_VERSION = {
   major: 2,
-  minor: 3,
-  hotfix: 'H2.3',
-  toString() { return `BLACKBOX black_${this.major}.${this.minor}`; },
+  minor: 4,
+  hotfix: 'H2.4',
+  toString() { return `BLACKBOX black_${this.major}.${this.minor}.${this.hotfix}`; },
   toBadge() { return `${this.toString()} • One-Page`; }
 };
 
