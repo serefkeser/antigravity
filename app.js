@@ -56,7 +56,7 @@ const APP_VERSION = {
   name: "anti 1.0",
   major: 1,
   minor: 0,
-  patch: 14,
+  patch: 15,
   toString() {
     return `${this.name}.${this.patch}`;
   },

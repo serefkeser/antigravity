@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [anti 1.0.15] - 2026-07-30
+
+### Fixed & Enhanced
+- **Permanently Eliminated `ReactDOMClient.createRoot()` Warning (`anti 1.0.15`):** Replaced static `__reactContainer$` key check with a dynamic `Object.keys(rootEl).some(k => k.startsWith('__reactFiber$') || ...)` scan in [anti.1.0.15.jsx](file:///c:/Users/skese/Downloads/antigravity/anti.1.0.15.jsx) and [app.js](file:///c:/Users/skese/Downloads/antigravity/app.js). React 18 stores its internal fiber under a random hash suffix — the static string was never matching, causing `createRoot` to be called on every script evaluation. Full re-compile with `esbuild`, `v=1.0.15` cache bust.
+- **Fixed `executeRender` Main Code Path MediaRecorder mimeType (Native MP4 Priority):** The primary `executeRender` render path (haber/iddia/all news types) was hard-coded to `video/webm`. Now tries `video/mp4; codecs="avc1.42E01E, mp4a.40.2"` → `video/mp4` → `video/webm` fallback.
+
+---
+
 ## [anti 1.0.14] - 2026-07-30
 
 ### Fixed & Enhanced
