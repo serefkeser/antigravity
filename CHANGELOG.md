@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [anti 1.0.1] - 2026-07-30
 
 ### Added
-- **Unified `anti 1.0` Versioning:** Standardized internal and external version numbers to `anti 1.0.x` matching filename (`anti.1.0.jsx`).
+- **Unified `anti 1.0` Versioning:** Standardized internal and external version numbers to `anti 1.0.x` matching filename ([anti.1.0.1.jsx](file:///c:/Users/skese/Downloads/antigravity/anti.1.0.1.jsx)).
 - **Senior Software Engineering Operational Checklist:** Established strict checklist in `.agents/AGENTS.md` enforcing empirical verification, semantic versioning, CHANGELOG logging, and mandatory GitHub synchronization on every task.
 - **Video Keyframe Extraction (`_extractVideoFrame`):** Video uploads now extract keyframes via HTML5 Canvas for multimodal Gemini API analysis to prevent video audio transcription traps.
 

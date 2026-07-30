@@ -20,7 +20,7 @@ Before concluding any task involving code changes, you MUST execute every step i
    - Test logic locally using Node/runtime verification commands.
 
 2. **Unified Versioning & Auto Increment (`anti 1.0.x`):**
-   - Increment patch/minor version in `APP_VERSION` in [anti.1.0.jsx](file:///c:/Users/skese/Downloads/antigravity/anti.1.0.jsx#L130-L137) (`anti 1.0.x`) on EVERY single code change. Internal version string (`APP_VERSION.toString()`) and external version MUST always match `anti 1.0.x`.
+   - Increment patch/minor version in `APP_VERSION` in [anti.1.0.1.jsx](file:///c:/Users/skese/Downloads/antigravity/anti.1.0.1.jsx#L130-L137) (`anti 1.0.x`) and rename file to match version on EVERY single code change. Internal version string (`APP_VERSION.toString()`) and external version MUST always match `anti 1.0.x`.
 
 3. **Changelog Maintenance (`CHANGELOG.md`):**
    - Record all additions, fixes, prompt upgrades, and render enhancements in [CHANGELOG.md](file:///c:/Users/skese/Downloads/antigravity/CHANGELOG.md).
