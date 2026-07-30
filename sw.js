@@ -1,10 +1,11 @@
-const CACHE_NAME = 'otonom-pwa-v1.0.9';
+const CACHE_NAME = 'otonom-pwa-v1.1.0';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
+  './react-vendor.js',
   './app.js',
   './anti.1.0.8.jsx'
 ];
