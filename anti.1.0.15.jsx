@@ -5899,23 +5899,18 @@ if (typeof window !== 'undefined') {
 }
 
 // ── App Mount: Standalone, Gemini Canvas & PWA Desteği ────────────────────
+// Root referansı DOM elementinde saklanır (window yerine) —
+// Canvas script yeniden değerlendirilse bile DOM elementi yaşadığı için root kaybolmaz
 if (typeof document !== 'undefined') {
   const rootEl = document.getElementById('root');
-  if (rootEl) {
+  if (rootEl && typeof ReactDOM !== 'undefined') {
     try {
-      if (typeof ReactDOM !== 'undefined' && typeof ReactDOM.createRoot === 'function') {
-        // React 18 fiber key'i dinamik hash içerir (örn: __reactFiber$abc123)
-        // Statik key kontrolü yerine dinamik arama yap
-        const alreadyMounted = Object.keys(rootEl).some(
-          k => k.startsWith('__reactFiber$') || k.startsWith('__reactContainer$') || k.startsWith('__reactInternalInstance$')
-        );
-        if (!window._reactRoot && !alreadyMounted) {
-          window._reactRoot = ReactDOM.createRoot(rootEl);
+      if (typeof ReactDOM.createRoot === 'function') {
+        if (!rootEl.__antiRoot) {
+          rootEl.__antiRoot = ReactDOM.createRoot(rootEl);
         }
-        if (window._reactRoot) {
-          window._reactRoot.render(<App />);
-        }
-      } else if (typeof ReactDOM !== 'undefined' && typeof ReactDOM.render === 'function') {
+        rootEl.__antiRoot.render(<App />);
+      } else if (typeof ReactDOM.render === 'function') {
         ReactDOM.render(<App />, rootEl);
       }
     } catch (e) {

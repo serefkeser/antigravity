@@ -6378,19 +6378,14 @@ if (typeof window !== "undefined") {
 }
 if (typeof document !== "undefined") {
   const rootEl = document.getElementById("root");
-  if (rootEl) {
+  if (rootEl && typeof ReactDOM !== "undefined") {
     try {
-      if (typeof ReactDOM !== "undefined" && typeof ReactDOM.createRoot === "function") {
-        const alreadyMounted = Object.keys(rootEl).some(
-          (k) => k.startsWith("__reactFiber$") || k.startsWith("__reactContainer$") || k.startsWith("__reactInternalInstance$")
-        );
-        if (!window._reactRoot && !alreadyMounted) {
-          window._reactRoot = ReactDOM.createRoot(rootEl);
+      if (typeof ReactDOM.createRoot === "function") {
+        if (!rootEl.__antiRoot) {
+          rootEl.__antiRoot = ReactDOM.createRoot(rootEl);
         }
-        if (window._reactRoot) {
-          window._reactRoot.render(/* @__PURE__ */ React.createElement(App, null));
-        }
-      } else if (typeof ReactDOM !== "undefined" && typeof ReactDOM.render === "function") {
+        rootEl.__antiRoot.render(/* @__PURE__ */ React.createElement(App, null));
+      } else if (typeof ReactDOM.render === "function") {
         ReactDOM.render(/* @__PURE__ */ React.createElement(App, null), rootEl);
       }
     } catch (e) {
