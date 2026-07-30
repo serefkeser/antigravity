@@ -8,7 +8,7 @@ Bu dosya, projedeki yüklü tüm **GitHub Repoları**, **Yetenekler (Skills)**, 
 
 | Repo / Yetenek Adı | Ne İşe Yarar? | GitHub Repo Linki |
 | :--- | :--- | :--- |
-| **`antigravity`** *(Ana Proje Reposu)* | AI video & içerik otomasyonu, FFmpeg MP4 dönüştürme sunucusu, TÜİK veri analitiği, Buffer paylaşımı ve anti 1.0.13 sürümü. | [serefkeser/antigravity](https://github.com/serefkeser/antigravity) |
+| **`antigravity`** *(Ana Proje Reposu)* | AI video & içerik otomasyonu, FFmpeg MP4 dönüştürme sunucusu, TÜİK veri analitiği, Buffer paylaşımı ve anti 1.0.14 sürümü. | [serefkeser/antigravity](https://github.com/serefkeser/antigravity) |
 | **`ponytail`** | En basit, minimal ve YAGNI ("You Ain't Gonna Need It") felsefesini benimseyen "Lazy Senior Dev" yeteneği. | [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail) |
 | **`caveman`** | Kısa, son derece öz ve yüksek token verimliliğinde kodlama ve yanıt üslubu. | [juliusbrussee/caveman](https://github.com/juliusbrussee/caveman) |
 | **`OpenMontage`** | Video kurgu, klip montajı ve otomatik render/pipeline motoru. | [calesthio/OpenMontage](https://github.com/calesthio/OpenMontage) |

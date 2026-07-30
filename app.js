@@ -56,7 +56,7 @@ const APP_VERSION = {
   name: "anti 1.0",
   major: 1,
   minor: 0,
-  patch: 13,
+  patch: 14,
   toString() {
     return `${this.name}.${this.patch}`;
   },
@@ -2718,7 +2718,9 @@ const RenderWorkerService = {
     if (audioDest) {
       audioDest.stream.getAudioTracks().forEach((t) => stream.addTrack(t));
     }
-    let mimeType = "video/webm; codecs=vp8,opus";
+    let mimeType = 'video/mp4; codecs="avc1.42E01E, mp4a.40.2"';
+    if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = "video/mp4";
+    if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = "video/webm; codecs=vp8,opus";
     if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = "video/webm";
     const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 4e6, audioBitsPerSecond: 128e3 });
     const chunks = [];
