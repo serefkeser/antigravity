@@ -132,7 +132,7 @@ const APP_VERSION = {
   name: 'anti 1.0',
   major: 1,
   minor: 0,
-  patch: 6,
+  patch: 7,
   toString() { return `${this.name}.${this.patch}`; },
   toBadge() { return `${this.name.toUpperCase()}.${this.patch} • Studio`; }
 };
@@ -272,25 +272,23 @@ const getLinkedInServerUrl = async () => {
   }
 
   // 2. HTTP Port 3000 dene
-  if (isLocalhostAllowed()) {
-    try {
-      const r = await fetch('http://localhost:3000/', { signal: AbortSignal.timeout(1200) });
-      if (r.ok) {
-        _linkedInServerUrl = 'http://localhost:3000';
-        addSystemLog('✓ LinkedIn yerel sunucu bulundu: http://localhost:3000', 'success');
-        return _linkedInServerUrl;
-      }
-    } catch(e) {}
+  try {
+    const r = await fetch('http://localhost:3000/', { signal: AbortSignal.timeout(1200) });
+    if (r.ok) {
+      _linkedInServerUrl = 'http://localhost:3000';
+      addSystemLog('✓ Yerel FFmpeg & LinkedIn sunucu bulundu: http://localhost:3000', 'success');
+      return _linkedInServerUrl;
+    }
+  } catch(e) {}
 
-    try {
-      const r = await fetch('http://127.0.0.1:3000/', { signal: AbortSignal.timeout(1200) });
-      if (r.ok) {
-        _linkedInServerUrl = 'http://127.0.0.1:3000';
-        addSystemLog('✓ LinkedIn yerel sunucu bulundu: http://127.0.0.1:3000', 'success');
-        return _linkedInServerUrl;
-      }
-    } catch(e) {}
-  }
+  try {
+    const r = await fetch('http://127.0.0.1:3000/', { signal: AbortSignal.timeout(1200) });
+    if (r.ok) {
+      _linkedInServerUrl = 'http://127.0.0.1:3000';
+      addSystemLog('✓ Yerel FFmpeg & LinkedIn sunucu bulundu: http://127.0.0.1:3000', 'success');
+      return _linkedInServerUrl;
+    }
+  } catch(e) {}
 
   return '';
 };

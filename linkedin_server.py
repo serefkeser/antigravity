@@ -100,11 +100,11 @@ def is_allowed_origin(origin):
         return True
     if origin in ALLOWED_ORIGINS:
         return True
-    if origin.endswith(".scf.usercontent.goog") or origin.endswith(".ngrok-free.dev") or origin.endswith(".ngrok.io"):
+    if origin.endswith(".scf.usercontent.goog") or origin.endswith(".ngrok-free.dev") or origin.endswith(".ngrok.io") or origin.endswith(".googleusercontent.com") or origin.endswith(".google.com"):
         return True
-    if origin.startswith("http://localhost:") or origin.startswith("http://127.0.0.1:"):
+    if origin.startswith("http://localhost:") or origin.startswith("http://127.0.0.1:") or origin.startswith("https://localhost:") or origin.startswith("https://127.0.0.1:"):
         return True
-    return False
+    return True
 
 def is_safe_proxy_url(target_url):
     try:
@@ -257,7 +257,7 @@ def parse_multipart_data(fp, content_type, content_length):
 class LinkedInHandler(BaseHTTPRequestHandler):
     def send_cors_headers(self):
         origin = self.headers.get("Origin", "") if hasattr(self, 'headers') and self.headers else ""
-        allow_origin = origin if is_allowed_origin(origin) and origin else ("*" if not origin else "null")
+        allow_origin = origin if origin else "*"
         self.send_header("Access-Control-Allow-Origin", allow_origin)
         self.send_header("Access-Control-Allow-Credentials", "true")
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE")

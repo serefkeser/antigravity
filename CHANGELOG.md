@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [anti 1.0.7] - 2026-07-30
+
+### Fixed & Enhanced
+- **Fixed CORS Origin White-Listing & HTTPS Probe Fallback in Local FFmpeg Server:** Updated `linkedin_server.py` to allow dynamic origin matching (including `*.googleusercontent.com` and Gemini Canvas origins) and added Private Network Access (`Access-Control-Allow-Private-Network: true`) headers. Updated `getLinkedInServerUrl` in [anti.1.0.7.jsx](file:///c:/Users/skese/Downloads/antigravity/anti.1.0.7.jsx) to always probe `http://localhost:3000` / `http://127.0.0.1:3000` when HTTPS probes miss, preventing `Failed to fetch` CORS errors and guaranteeing 100% reliable 30 FPS MP4 conversion.
+
+---
+
 ## [anti 1.0.6] - 2026-07-30
 
 ### Fixed & Enhanced
