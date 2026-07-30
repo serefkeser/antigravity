@@ -4121,7 +4121,7 @@ class ErrorBoundary extends React.Component {
             // ============================================================================
             // MAIN APP — VOLUME MIXER & REFERENCE IMAGE SECTIONS REMOVED
             // ============================================================================
-            export default function App() {
+            function App() {
               const [user, setUser] = useState(null);
               const [authExpired, setAuthExpired] = useState(false);
               const isLoadedRef = useRef(false);

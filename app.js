@@ -4559,7 +4559,7 @@ const GazeteCropModal = React.memo(({ src, name, onClose, onCrop }) => {
     /* @__PURE__ */ React.createElement("div", { className: "absolute -top-6 left-0 bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow whitespace-nowrap" }, Math.round(selW), " \xD7 ", Math.round(selH), " px")
   ))))));
 });
-export default function App() {
+function App() {
   const [user, setUser] = useState(null);
   const [authExpired, setAuthExpired] = useState(false);
   const isLoadedRef = useRef(false);
