@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [anti 1.0.2] - 2026-07-30
+
+### Fixed & Enhanced
+- **Seamless Clickbait-to-News Transition (0.0s Gap):** Clickbait hook scene transition is now instantaneous with 0.0s audio delay (`transition: 'none'`), eliminating silence pauses or black frame gaps between the clickbait cover and the first news headline.
+- **Strict 1.0x Normal Audio Speed Lock:** Fixed `scaleFactor = 1.0` and `source.playbackRate.value = 1.0` permanently across all audio rendering engines. Audio speech playback is locked at 1.0x normal speed (never slowed down or speeded up).
+- **Dynamic & Unique Closing Quote (Son Söz):** Overhauled `sonSoz` prompt to draw from global and Turkish thinkers/philosophers (Mevlana, Atatürk, Yunus Emre, Platon, Nietzsche, Seneca, Montaigne, İbn Haldun etc.). Implemented `localStorage` quote history caching (`getRecentSonSozList` / `addRecentSonSoz`) to guarantee no closing quote is ever repeated.
+
+---
+
 ## [anti 1.0.1] - 2026-07-30
 
 ### Added

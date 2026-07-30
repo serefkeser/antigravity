@@ -132,7 +132,7 @@ const APP_VERSION = {
   name: 'anti 1.0',
   major: 1,
   minor: 0,
-  patch: 1,
+  patch: 2,
   toString() { return `${this.name}.${this.patch}`; },
   toBadge() { return `${this.name.toUpperCase()}.${this.patch} • Studio`; }
 };
@@ -1122,6 +1122,36 @@ class LogicEngineService {
     return text;
   }
 
+  static getRecentSonSozList() {
+    try {
+      const raw = localStorage.getItem('otonom_recent_son_soz');
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) { return []; }
+  }
+
+  static addRecentSonSoz(quote) {
+    try {
+      if (!quote || typeof quote !== 'string' || quote.trim().length < 5) return;
+      let list = LogicEngineService.getRecentSonSozList();
+      const clean = quote.trim();
+      if (!list.some(item => item.toLowerCase() === clean.toLowerCase())) {
+        list.unshift(clean);
+        if (list.length > 50) list = list.slice(0, 50);
+        localStorage.setItem('otonom_recent_son_soz', JSON.stringify(list));
+      }
+    } catch (e) {}
+  }
+
+  static _buildSonSozRule() {
+    const recent = LogicEngineService.getRecentSonSozList();
+    const recentText = recent.length > 0 ? `\n\nSON VİDEOLARDA KULLANILMIŞ SÖZLER (BUNLARI KESİNLİKLE TEKRAR ETME!):\n${recent.slice(0, 15).map(s => `• "${s}"`).join('\n')}` : '';
+
+    return `\n\nZORUNLU SON SÖZ ZENGİNLİĞİ VE BİLGE DÜŞÜNÜR KURALLARI:
+- 'sonSoz' alanına KESİNLİKLE her videoda konunun özüne ve hissiyatına cuk diye oturan, YÜZDE 100 FARKLI VE ÖZGÜN BİR SÖZ YAZ!
+- Sıradan veya aşırı ezberlenmiş "Damlaya damla göl olur", "Sabır acıdır meyvesi tatlıdır", "Güneş girmeyen eve doktor girer" gibi basma kalıp atasözlerini KESİNLİKLE KULLANMA!
+- Türk ve dünya edebiyatından, felsefesinden, sosyolojisinden, tarihinden ve büyük düşünürlerinden (örneğin: Mevlana, Yunus Emre, Mustafa Kemal Atatürk, Platon, Aristoteles, Konfüçyüs, Montaigne, Friedrich Nietzsche, Marcus Aurelius, Seneca, Fyodor Dostoyevski, Baruch Spinoza, Victor Hugo, İbn Haldun, Niccolò Machiavelli, Nazım Hikmet, Cemil Meriç, Mehmet Akif Ersoy, Franz Kafka, Lev Tolstoy, Albert Camus vb.) veya derin anlam taşıyan özgün halk vecizelerinden tamamen farklı bir bilge sözü seç ve yaz.${recentText}`;
+  }
+
   static validateEconomyData(data) {
     const errors = [];
     if (!data || !data.videoSlides) return errors;
@@ -1185,7 +1215,7 @@ class LogicEngineService {
     }
 
     let sonSozInstruction = "";
-    if (!isImageOutput) sonSozInstruction = `\n\nYEDİNCİ KURAL (SON SÖZ): Konuya cuk diye oturan çok vurucu bir ATASÖZÜ veya ÖZLÜ SÖZ belirle. Bunu 'sonSoz' alanına kaydet.`;
+    if (!isImageOutput) sonSozInstruction = LogicEngineService._buildSonSozRule();
 
     const sysPrompt = `Sen TikTok ve Instagram Reels için viral içerikler üreten profesyonel bir içerik üreticisisin. Karakterin: Zeki, gerçekleri söyleyen, 20 yaşında dertli bir genç.\n\nSENARYOYU ${isImageOutput ? 1 : sceneCount} SAHNE olacak şekilde böl!\nToplam konuşma metni ${words} kelime aralığında olmalıdır.\n\nDİL KURALI: ${langInstruction}\n${styleInstruction}\n${dynamicRules}\n\nEKONOMI KURALLARI (ekonomi haberi ise): Turkce karakter kullan, TL para birimi, sayi bicimi 85.450 TL, kaynak belirt (TUIK, TCMB, TURK-IS), aclik/yoksulluk siniri guncel olsun. Bilgi kartlari olustur: ENFLASYON %XX, ACLIK SINIRI XX.XXX TL.\n\nGAZETE BAŞLIKLARI: Görseldeki TÜM haber başlıklarını çıkar. Her başlık için:
     - 'baslik': başlık metni
@@ -1214,7 +1244,7 @@ class LogicEngineService {
        - 'spokenText': Sadece okunacak haber başlığı ve detay açıklaması olmalıdır.
 
     3. KAPANIS SAHNESİ (SON SÖZ VE ABONE OL):
-       - 'sonSoz': Konuya cuk diye oturan çok vurucu bir atasözü veya özlü söz!
+       - 'sonSoz': Konuya cuk diye oturan, Türk/Dünya edebiyatı ve büyük düşünürlerinden (Atatürk, Mevlana, Yunus Emre, Platon, Nietzsche, Seneca, Montaigne vb.) derlenmiş çok vurucu ve BENZERSİZ bir söz!
        - 'lastQuote': "Daha fazlası için takip edin ve kanala abone olun!" mesajı.
 
     - SIFIR HALÜSİNASYON: Okuyamadıysan 'isContentUnreadable' true yap.
@@ -1267,6 +1297,7 @@ Dönüş ZORUNLU olarak JSON formatında olmalı.`;
     };
     const parsedData = await _callGeminiAndParse(url, payload);
     if (parsedData.isContentUnreadable) throw new Error("Orijinal metne ulaşılamadı.");
+    if (parsedData.sonSoz) LogicEngineService.addRecentSonSoz(parsedData.sonSoz);
     
     // Maksimum 3 Kelime Zorunlu Filtreleme Fonksiyonu
     const _cleanMaxThreeWords = (text) => {
@@ -1622,7 +1653,7 @@ ${buildEconomicDataBlock()}
    - Durum etiketleri: 'Doğru', 'Kısmen Doğru', 'Eksik Bağlam', 'Yanlış', 'Doğrulanabiliyor / Veri Yetersiz'.
    - Güven skoru: 0-100 arası.
    - Kanıtlar: Resmi Kaynak Adı + Tarih (${_curMonthYear}) + Resmi Veri.
-   - Video senaryosu (videoSlides): 5sn Vurucu Hook -> İddia Metni -> 2002 vs ${_curMonthYear} Dönüşüm Analizi -> Resmi Kanıtlar ve Rakamlar -> Sonuç Özet.
+   - Video senaryosu (videoSlides): 5sn Vurucu Hook -> İddia Metni -> 2002 vs ${_curMonthYear} Dönüşüm Analizi -> Resmi Kanıtlar ve Rakamlar -> Sonuç Özet.${LogicEngineService._buildSonSozRule()}
 
 Dönüş ZORUNLU olarak geçerli JSON formatında olmalıdır.`;
 
@@ -1656,6 +1687,7 @@ Dönüş ZORUNLU olarak geçerli JSON formatında olmalıdır.`;
       tools: [{ google_search: {} }]
     };
     const parsedData = await _callGeminiAndParse(url, payload);
+    if (parsedData.sonSoz) LogicEngineService.addRecentSonSoz(parsedData.sonSoz);
     const hasErrorText = (parsedData.videoSlides || []).some(s => ERROR_PATTERNS.some(p => p.test(s.spokenText || '') || p.test(s.topText || ''))) ||
                           (parsedData.iddialar || []).some(i => ERROR_PATTERNS.some(p => p.test(i.iddia || '') || p.test(i.analiz || '')));
 
@@ -2548,15 +2580,14 @@ class MediaSynthesisService {
         let globalRenderedSec = 0;
         const getAudioDur = (audioData, fallbackText) => { if (audioData?.wavBuffer) { let byteLength = 0; if (audioData.wavBuffer instanceof ArrayBuffer) byteLength = audioData.wavBuffer.byteLength; else if (audioData.wavBuffer.buffer instanceof ArrayBuffer) byteLength = audioData.wavBuffer.buffer.byteLength; else if (audioData.wavBuffer.byteLength) byteLength = audioData.wavBuffer.byteLength; if (byteLength > 44) { const sampleRate = audioData.sampleRate || 24000; return (byteLength - 44) / (sampleRate * 2); } } const wordsCount = (fallbackText || "").trim().split(/\s+/).filter(Boolean).length; if (wordsCount === 0) return 0.5; return Math.max(1.0, wordsCount / getWPS(jobData.config.language)); };
 
-        let rawKapakDur = jobData.assets.thumbnailAudio ? (getAudioDur(jobData.assets.thumbnailAudio, jobData.script.thumbnailText) + 0.05) : 1.0;
-        let rawSonSozDur = jobData.script.sonSoz ? (getAudioDur(jobData.assets.sonSozAudio, jobData.script.sonSoz) + 0.05) : 0;
-        let rawOutroDur = Math.max(4.0, getAudioDur(jobData.assets.outroAudio, jobData.script.lastQuote) + 0.05); // 0 boşluk — kesintisiz geçiş
-        let rawSlideSecs = jobData.script.videoSlides.map((s, i) => getAudioDur(jobData.assets.audio[i], s.spokenText) + 0.0); // +0.0 — sahne arası boşluk yok
-        let rawCushion = 0.01; // Minimum cushion — video sonu sessizlik yok
+        let rawKapakDur = jobData.assets.thumbnailAudio ? getAudioDur(jobData.assets.thumbnailAudio, jobData.script.thumbnailText) : 1.0;
+        let rawSonSozDur = jobData.script.sonSoz ? getAudioDur(jobData.assets.sonSozAudio, jobData.script.sonSoz) : 0;
+        let rawOutroDur = Math.max(4.0, getAudioDur(jobData.assets.outroAudio, jobData.script.lastQuote)); // 0 boşluk — kesintisiz geçiş
+        let rawSlideSecs = jobData.script.videoSlides.map((s, i) => getAudioDur(jobData.assets.audio[i], s.spokenText)); // 0.0 — sahne arası boşluk yok
+        let rawCushion = 0.001; // Minimum cushion — video sonu sessizlik yok
         let totalNaturalSec = rawKapakDur + rawSonSozDur + rawOutroDur + rawCushion + rawSlideSecs.reduce((a, b) => a + b, 0);
-        let scaleFactor = 1.0;
-        if (hasMultipleBlocks) { addSystemLog(`Çoklu blok: Süre sınırı yok. Doğal okuma hızı (${totalNaturalSec.toFixed(1)}sn).`, 'info'); }
-        else if (useForceExact) { if (totalNaturalSec > bounds.max) { scaleFactor = bounds.max / totalNaturalSec; addSystemLog(`Süre limitine sığdırılıyor (${scaleFactor.toFixed(2)}x)...`, "warn"); } else if (totalNaturalSec < bounds.min) { scaleFactor = bounds.min / totalNaturalSec; addSystemLog(`Minimum süre yakalanıyor (${scaleFactor.toFixed(2)}x)...`, "warn"); } }
+        const scaleFactor = 1.0; // DAİMA 1.0x (Kullanıcı talebi: Seslendirme hızı ne yavaş ne hızlı, daima sabit kalacak)
+        addSystemLog(`Doğal okuma hızı (1.0x): Toplam ${totalNaturalSec.toFixed(1)}sn.`, 'info');
 
         const timerWorker = _createTimerWorker(); timerWorker.postMessage('start');
         let frameResolvers = [];
@@ -2591,7 +2622,7 @@ class MediaSynthesisService {
             try {
               let bufferCopy; if (audioData.wavBuffer instanceof ArrayBuffer) bufferCopy = audioData.wavBuffer.slice(0); else if (audioData.wavBuffer.buffer instanceof ArrayBuffer) bufferCopy = audioData.wavBuffer.buffer.slice(0); else if (typeof audioData.wavBuffer === 'object') { const uint8 = new Uint8Array(Object.values(audioData.wavBuffer)); bufferCopy = uint8.buffer.slice(0); } else bufferCopy = audioData.wavBuffer;
               const audioBuf = await audioCtx.decodeAudioData(bufferCopy); const source = audioCtx.createBufferSource(); source.buffer = audioBuf;
-              source.playbackRate.value = scaleFactor; // Ses + alt yazı senkron — scaleFactor ile aynı hız
+              source.playbackRate.value = 1.0; // DAİMA 1.0x (Normal okuma hızı — yavaşlatma / hızlandırma yapılmaz)
               const gain = audioCtx.createGain(); gain.gain.value = preferences?.narratorVolume ?? 0.8; // Narrator — kullanıcı ayarından
               source.connect(gain); gain.connect(audioDest); source.start(0);
               baseExactDur = Math.min(audioBuf.duration, 180.0); // Maksimum 3 dakika sınırı
@@ -2599,7 +2630,8 @@ class MediaSynthesisService {
               audioEndPromise = new Promise(resolve => { source.onended = resolve; });
             } catch (e) { console.warn("Ses decode hatası:", e); }
           }
-          let scaledExactDur = baseExactDur * scaleFactor; let totalDur = requestedDuration !== null ? (requestedDuration * scaleFactor) : (scaledExactDur + 0.05); // +0.05 minimal buffer — sessizlik yok
+          let scaledExactDur = baseExactDur;
+          let totalDur = requestedDuration !== null ? requestedDuration : scaledExactDur; // Kesintisiz akış — ekstra boşluk yok
           return { exactDur: scaledExactDur, totalDur, audioEndPromise };
         };
 
