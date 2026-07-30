@@ -5,6 +5,7 @@ const ASSETS_TO_CACHE = [
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
+  './app.js',
   './anti.1.0.8.jsx'
 ];
 
