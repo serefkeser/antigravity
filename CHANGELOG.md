@@ -1,3 +1,8 @@
+### v1.0.21 (2026-07-31)
+- **fix(ffmpeg)**: `SharedArrayBuffer is not defined` hatası kalıcı olarak giderildi. Tarayıcıda `SharedArrayBuffer` yoksa ffmpeg.wasm çağrısı güvenli şekilde atlanıp video doğrudan paketlenir.
+- **fix(render)**: Native MP4 tespiti eklendi — tarayıcı kaydı zaten MP4 ise gereksiz dönüştürme adımları atlandı.
+- **fix(download)**: 2 kez üst üste otomatik indirme (`gizli_silah_cikti.mp4`) hatası çözüldü — `autoSaveVideo` içerisindeki gereksiz 2. MP4 dönüştürme döngüsü kaldırıldı ve `_lastAutoDownloadedJobId` duplikat koruması eklendi.
+
 ### v1.0.20 (2026-07-31)
 - **fix(react)**: `ReactDOMClient.createRoot()` konsol uyarısı kalıcı olarak giderildi. `window._antiReactRoot` global nesnesi ve DOM elementindeki önceden türetilmiş `__reactContainer$` anahtarları dinamik taranarak temizlenip tek bir root üzerinden render garantilendi.
 - **fix(log)**: Başlangıçtaki pasif müzik kontrolünde tekrarlanan `"Müzik kütüphanesi boş. 'MÜZİK KLASÖRÜ SEÇ' butonundan bir kez ekleyin."` bilgi uyarısı sessiz moda alındı (sadece kullanıcı müzik klasörü yüklediğinde sistem günlüğü yazılır).
