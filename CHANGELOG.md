@@ -1,3 +1,8 @@
+### v1.0.22 (2026-07-31)
+- **feat(iddia-analizi)**: İddia Analizi akışı güçlendirildi: Yüklenen video/ses/görsel medyası 2. slaytta kesintisiz ve sonuna kadar oynatılır/gösterilir.
+- **feat(iddia-analizi)**: Medyadan hemen sonraki slaytlarda Türkiye'deki o konu ile ilgili gerçekte ne olduğunu anlayan, açıklayan eleştirel, tarafsız ve kaynaklı analiz otomatik devreye girer.
+- **feat(iddia-analizi)**: TÜİK, TCMB, TÜRK-İŞ, DİSK-AR, Hazine verileri ve 2002 kıyaslamasıyla resmi doğrulanabilir kaynaklar ve KAYNAKLAR slaytı zorunlu kılındı.
+
 ### v1.0.21 (2026-07-31)
 - **fix(ffmpeg)**: `SharedArrayBuffer is not defined` hatası kalıcı olarak giderildi. Tarayıcıda `SharedArrayBuffer` yoksa ffmpeg.wasm çağrısı güvenli şekilde atlanıp video doğrudan paketlenir.
 - **fix(render)**: Native MP4 tespiti eklendi — tarayıcı kaydı zaten MP4 ise gereksiz dönüştürme adımları atlandı.
