@@ -2397,6 +2397,8 @@ class MediaSynthesisService {
         if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume().catch((e) => { ErrorHandler.silent(e); });
         const audioDest = audioCtx ? audioCtx.createMediaStreamDestination() : null;
         const { osc: silentOsc, gain: silentGain } = _createSilentOsc(audioCtx, audioDest);
+        let bgmSource = null; // BGM: tüm video boyunca
+        let masterGain = null;
 
         const maxAllowedDur = 120.0;
         const sceneCount = isMultilang ? Math.min(slides.length, 3) : 1;
