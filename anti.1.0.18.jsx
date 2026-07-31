@@ -145,6 +145,7 @@ const RENDER_CONFIG = {
   WINDOW_SIZE: 5,
   VOICE_VOLUME: 0.80,
   BGM_VOLUME: 0.29,
+  SPEECH_RATE: 1.0,
   VIDEO_BITS_PER_SECOND: 4_000_000,
   MIN_CROP_SIZE: 10,
   MAX_BLOCKS: 10,
@@ -2442,7 +2443,7 @@ class MediaSynthesisService {
               const ambientObj = AmbientAudioService.getAmbientNode(audioCtx, ambientSound);
               if (ambientObj) {
                 bgmSource = ambientObj.source; masterGain = audioCtx.createGain();
-                masterGain.gain.value = preferences?.backgroundMusicVolume ?? RENDER_CONFIG.BGM_VOLUME;
+                masterGain = audioCtx.createGain(); masterGain.gain.value = (typeof preferences?.backgroundMusicVolume === 'number' && isFinite(preferences.backgroundMusicVolume)) ? preferences.backgroundMusicVolume : (RENDER_CONFIG.BGM_VOLUME || 0.29);
                 ambientObj.gainNode.connect(masterGain); masterGain.connect(audioDest);
                 addSystemLog('Atmosfer sesi: ' + ambientSound, 'success');
               }
@@ -2515,11 +2516,14 @@ class MediaSynthesisService {
           if (ab) {
             voiceSource = audioCtx.createBufferSource();
             voiceSource.buffer = ab;
-            voiceSource.playbackRate.value = RENDER_CONFIG.SPEECH_RATE;
-            const vGain = audioCtx.createGain(); vGain.gain.value = preferences?.narratorVolume ?? RENDER_CONFIG.VOICE_VOLUME;
+            const safeRate = (typeof RENDER_CONFIG.SPEECH_RATE === 'number' && isFinite(RENDER_CONFIG.SPEECH_RATE)) ? RENDER_CONFIG.SPEECH_RATE : 1.0;
+            voiceSource.playbackRate.value = safeRate;
+            const rawVol = preferences?.narratorVolume;
+            const safeVol = (typeof rawVol === 'number' && isFinite(rawVol)) ? rawVol : (RENDER_CONFIG.VOICE_VOLUME || 0.8);
+            const vGain = audioCtx.createGain(); vGain.gain.value = safeVol;
             voiceSource.connect(vGain); vGain.connect(audioDest);
             voiceSource.start(0);
-            addSystemLog(`Sahne ${si+1} sesi başladı (${langLabel}).`, 'info');
+            addSystemLog(`Sahne ${si+1} sesi başladı (${langLabel}) — vol:${safeVol.toFixed(2)}.`, 'info');
           }
 
           for (let f = 0; f < sceneFrames; f++, globalFrame++) {
