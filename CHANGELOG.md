@@ -1,3 +1,7 @@
+### v1.0.23 (2026-07-31)
+- **fix(download)**: 2 adet MP4 indirme sorunu tamamen giderildi — `_globalLastAutoDownloadedJobId` global kapsama taşındı, React re-render'larında duplikat indirme engellendi ve render başındaki otomatik `showSaveFilePicker` penceresi kapatıldı.
+- **fix(clickbait)**: Clickbait kapak başlığı KESİNLİKLE MAKSİMUM 3 KELİME ile sınırlandı — 4 veya daha fazla kelime olması engellendi (`words.slice(0, 3)` zorlaması tüm modlara uygulandı).
+
 ### v1.0.22 (2026-07-31)
 - **feat(iddia-analizi)**: İddia Analizi akışı güçlendirildi: Yüklenen video/ses/görsel medyası 2. slaytta kesintisiz ve sonuna kadar oynatılır/gösterilir.
 - **feat(iddia-analizi)**: Medyadan hemen sonraki slaytlarda Türkiye'deki o konu ile ilgili gerçekte ne olduğunu anlayan, açıklayan eleştirel, tarafsız ve kaynaklı analiz otomatik devreye girer.
