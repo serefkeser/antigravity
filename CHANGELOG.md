@@ -1,3 +1,11 @@
+### v1.0.18 (2026-07-31)
+- **feat(guzel-soz)**: Çok dilli (FR→DE→TR) mod tam implementasyonu: Gemini ile sözü 3 dile çevirir, her dil için ayrı sahne + ayrı ses üretir.
+- **fix(guzel-soz)**: Üst üste ses sorunu giderildi — artık her sahne kendi `audio[i]` buffer'ını kullanır, bir önceki sahne sesi durdurulunca sonraki başlar.
+- **fix(guzel-soz)**: Sahne değişmeme sorunu giderildi — sahne süresi artık `audio[i].duration`'dan alınır, ses bitince görsel kesin olarak geçer.
+- **feat(guzel-soz)**: Sağ üst köşede dil etiketi (🇫🇷 FR / 🇩🇪 DE / 🇹🇷 TR) altın renginde gösterilir, fade-in animasyonlu.
+- **feat(guzel-soz)**: `_isMultilang: true` flag ile eski tek-dilli davranış geriye uyumlu korundu.
+- **fix(guzel-soz)**: Asset üretimi artık `audio[0/1/2]` döngüsüyle 3 ayrı dilde TTS üretir.
+
 ### v1.0.17 (2026-07-30)
 - **fix(iddia-analizi)**: Meta-prompting / yapay zeka betimleme sızıntıları (spokenText) engellendi.
 - **fix(iddia-analizi)**: Yüklenen medyanın 2. slaytta kesintisiz oynatılması programlama seviyesinde garanti altına alındı.
