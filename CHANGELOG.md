@@ -1,3 +1,9 @@
+### v1.0.19 (2026-07-31)
+- **fix(render)**: Zorla Sıfır Boşluk (Zero-Gap Transition): Güzel Söz, Haber, İddia ve tüm girdi türlerinde sahneler arası boşluklar ve sessizlikler tamamen kaldırıldı.
+- **fix(render)**: `playAudio` içinde ses decode edilmişse (`audioBuf`), tahmin/byte bazlı süreler devre dışı bırakılıp `audioBuf.duration` tek yetkili kılındı.
+- **fix(render)**: `renderScene` ve `renderGuzelSoz` döngülerine `audioEnded` dinleyicisi eklendi; ses bittiği milisaniyede kare döngüsü kırılarak doğrudan bir sonraki sahneye geçilmesi zorlandı.
+- **fix(guzel-soz)**: `renderGuzelSoz`'daki `+0.5s` ekleme ve `minDur = 4.0s` zorlaması kaldırıldı.
+
 ### v1.0.18 (2026-07-31)
 - **feat(guzel-soz)**: Çok dilli (FR→DE→TR) mod tam implementasyonu: Gemini ile sözü 3 dile çevirir, her dil için ayrı sahne + ayrı ses üretir.
 - **fix(guzel-soz)**: Üst üste ses sorunu giderildi — artık her sahne kendi `audio[i]` buffer'ını kullanır, bir önceki sahne sesi durdurulunca sonraki başlar.
