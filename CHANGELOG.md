@@ -1,3 +1,7 @@
+### v1.0.20 (2026-07-31)
+- **fix(react)**: `ReactDOMClient.createRoot()` konsol uyarısı kalıcı olarak giderildi. `window._antiReactRoot` global nesnesi ve DOM elementindeki önceden türetilmiş `__reactContainer$` anahtarları dinamik taranarak temizlenip tek bir root üzerinden render garantilendi.
+- **fix(log)**: Başlangıçtaki pasif müzik kontrolünde tekrarlanan `"Müzik kütüphanesi boş. 'MÜZİK KLASÖRÜ SEÇ' butonundan bir kez ekleyin."` bilgi uyarısı sessiz moda alındı (sadece kullanıcı müzik klasörü yüklediğinde sistem günlüğü yazılır).
+
 ### v1.0.19 (2026-07-31)
 - **fix(render)**: Zorla Sıfır Boşluk (Zero-Gap Transition): Güzel Söz, Haber, İddia ve tüm girdi türlerinde sahneler arası boşluklar ve sessizlikler tamamen kaldırıldı.
 - **fix(render)**: `playAudio` içinde ses decode edilmişse (`audioBuf`), tahmin/byte bazlı süreler devre dışı bırakılıp `audioBuf.duration` tek yetkili kılındı.
