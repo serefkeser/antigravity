@@ -1,4 +1,4 @@
-# Security & Secrets
+﻿# Security & Secrets
 .env
 *.env
 linkedin_token.json
@@ -23,3 +23,5 @@ dist/
 Thumbs.db
 .vscode/
 .idea/
+
+muzik/

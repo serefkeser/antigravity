@@ -1,4 +1,6 @@
-﻿### v1.0.31 (2026-08-29)
+﻿### v1.0.32 (2026-08-29)
+- **feat(music/offline-download)**: Google Drive klasöründeki (\19bbiNUvhdq5FyCdPYDsfVEN7RpFajJMY\) tüm 148 müzik parçası doğrudan yerel \muzik/\ dizinine indirildi ve \AssetManagerService\ yerel/bulut hibrit desteği ile bağlandı.
+### v1.0.31 (2026-08-29)
 - **fix(instagram/cfr-fps)**: Instagram Reels & Meta Graph API tarafından verilen "23-60 FPS olmalıdır" hatası kalıcı olarak giderildi:
   1. \convertWebMtoMP4\ fonksiyonuna zorunlu \-vf fps=fps=30,format=yuv420p\, \-r 30\, \-profile:v main\, \-level 4.0\, \-g 30\, \-keyint_min 30\ ve \-ar 44100\ parametreleri eklendi.
   2. \uploadMediaToCloud\ içerisinde tarayıcının yerel MediaRecorder MP4/WebM çıktıları dahil tüm video formatları buluta veya Buffer'a yüklenmeden önce kesin olarak bu standart Constant Frame Rate (CFR 30.000 FPS) kodlayıcısından geçirilir.
