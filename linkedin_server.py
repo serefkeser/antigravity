@@ -579,6 +579,45 @@ class LinkedInHandler(BaseHTTPRequestHandler):
 
             filename = media_file.get("filename", "video.mp4")
             data = media_file.get("data", b"")
+            
+            # Instagram CFR 30 FPS transcode via system ffmpeg if video
+            if filename.lower().endswith(('.mp4', '.webm', '.mov')) and len(data) > 0:
+                try:
+                    import subprocess, tempfile, os
+                    with tempfile.NamedTemporaryFile(suffix='.raw', delete=False) as tf_in:
+                        tf_in.write(data)
+                        tf_in_name = tf_in.name
+                    tf_out_name = tf_in_name + '_cfr30.mp4'
+                    cmd = [
+                        'ffmpeg', '-y', '-i', tf_in_name,
+                        '-vf', 'fps=fps=30,format=yuv420p',
+                        '-r', '30',
+                        '-c:v', 'libx264',
+                        '-profile:v', 'main',
+                        '-level', '4.0',
+                        '-preset', 'fast',
+                        '-pix_fmt', 'yuv420p',
+                        '-c:a', 'aac',
+                        '-b:a', '128k',
+                        '-ar', '44100',
+                        '-ac', '2',
+                        '-g', '30',
+                        '-keyint_min', '30',
+                        '-movflags', '+faststart',
+                        tf_out_name
+                    ]
+                    res = subprocess.run(cmd, capture_output=True, timeout=60)
+                    if res.returncode == 0 and os.path.exists(tf_out_name) and os.path.getsize(tf_out_name) > 1000:
+                        with open(tf_out_name, 'rb') as f_out:
+                            data = f_out.read()
+                        filename = os.path.splitext(filename)[0] + '.mp4'
+                        print(f"[SERVER] Instagram 30 FPS CFR transcode basarili: {len(data)} bytes")
+                    try:
+                        os.remove(tf_in_name)
+                        if os.path.exists(tf_out_name): os.remove(tf_out_name)
+                    except: pass
+                except Exception as ex:
+                    print(f"[SERVER] FFmpeg transcode atlanti: {ex}")
 
             try:
                 r1 = requests.post("https://temp.sh/upload", files={"file": (filename, data)}, timeout=30)

@@ -1,4 +1,9 @@
-﻿### v1.0.30 (2026-08-29)
+﻿### v1.0.31 (2026-08-29)
+- **fix(instagram/cfr-fps)**: Instagram Reels & Meta Graph API tarafından verilen "23-60 FPS olmalıdır" hatası kalıcı olarak giderildi:
+  1. \convertWebMtoMP4\ fonksiyonuna zorunlu \-vf fps=fps=30,format=yuv420p\, \-r 30\, \-profile:v main\, \-level 4.0\, \-g 30\, \-keyint_min 30\ ve \-ar 44100\ parametreleri eklendi.
+  2. \uploadMediaToCloud\ içerisinde tarayıcının yerel MediaRecorder MP4/WebM çıktıları dahil tüm video formatları buluta veya Buffer'a yüklenmeden önce kesin olarak bu standart Constant Frame Rate (CFR 30.000 FPS) kodlayıcısından geçirilir.
+  3. \linkedin_server.py\ yerel proxy sunucusuna sistem FFmpeg'i üzerinden sunucu taraflı 30 FPS CFR doğrulama ve transcode katmanı eklendi.
+### v1.0.30 (2026-08-29)
 - **feat(music/gdrive)**: Verilen Google Drive klasöründen (\19bbiNUvhdq5FyCdPYDsfVEN7RpFajJMY\) **148 adet müzik parçası** otomatik olarak çekildi ve sisteme entegre edildi.
 - **feat(music/cache)**: \GDRIVE_CLOUD_MUSIC_CATALOG\ ve \AssetManagerService.getMusicFromLib\ mimarisi ile parçalar talep anında doğrudan Google Drive / proxy üzerinden indirilip IndexedDB'ye önbelleğe alınır; kullanıcı müdahalesi gerektirmeden hazır çalışır.
 ### v1.0.29 (2026-08-29)
