@@ -1,109 +1,74 @@
----
+﻿---
 name: loop-dongusu
 description: Self-correcting development loop that automatically writes code, runs tests, analyzes errors, and iterates until all tests pass — zero human intervention required during the cycle.
 ---
 
-# Loop Döngüsü (Self-Correcting Development Loop)
+# Loop Dongusu (Self-Correcting Development Loop)
 
-Bu skill, her kod değişikliğinde otomatik olarak uygulanır. İnsan müdahalesi olmadan hata tespit → analiz → düzeltme → doğrulama döngüsünü çalıştırır.
+Bu skill, her kod degisikliginde otomatik olarak uygulanir. Insan mudahalesi olmadan hata tespit -> analiz -> duzeltme -> dogrulama dongusunu calistirir.
 
-## Döngü Akışı
+## Dongu Akisi
 
-```
-┌─────────────────────────────────────────────────────┐
-│  1. GİRDİ (Prompt)                                  │
-│     Kullanıcı özellik/hata tanımı                   │
-└──────────────────────┬──────────────────────────────┘
-                       ▼
-┌─────────────────────────────────────────────────────┐
-│  2. KOD ÜRETİMİ                                    │
-│     AI kodu yazar → dosyaya kaydeder                │
-└──────────────────────┬──────────────────────────────┘
-                       ▼
-┌─────────────────────────────────────────────────────┐
-│  3. OTOMATİK TEST (Doğrulama)                       │
-│     Sisteme uygun test komutu çalıştırılır:         │
-│     • Node/React: npm test / npm run build           │
-│     • Python: pytest / python -m unittest            │
-│     • Genel: lint, type-check, build komutu          │
-│     • Browser: dev server başlat + DOM/konsol kontrol│
-└──────────────────────┬──────────────────────────────┘
-                       ▼
-              ┌────────────────┐
-              │  Test Geçti?   │
-              └───┬────────┬───┘
-                  │        │
-              YES │        │ NO
-                  ▼        ▼
-        ┌──────────┐  ┌──────────────────────────────┐
-        │ ✅ BAŞARI │  │  4. HATA ANALİZİ             │
-        │  Tamamla  │  │  • Tam hata loglarını oku     │
-        │  & Raporla│  │  • Stack trace analiz et       │
-        └──────────┘  │  • Root cause belirle          │
-                      └──────────────┬───────────────┘
-                                     ▼
-                      ┌──────────────────────────────┐
-                      │  5. KENDİ KENDİNİ DÜZELTME   │
-                      │  • Hatayı düzelt               │
-                      │  • Kodu güncelle               │
-                      │  • Adım 3'e geri dön ↩️        │
-                      └──────────────────────────────┘
-```
+1. GIRDI (Prompt) -> Kullanici ozellik/hata tanimi
+2. KOD URETIMI -> AI kodu yazar, dosyaya kaydeder
+3. OTOMATIK TEST -> Sisteme uygun test komutu calistirilir
+4. HATA ANALIZI -> Tam hata loglarini oku, stack trace analiz et, root cause belirle
+5. KENDI KENDINI DUZELTME -> Hatayi duzelt, kodu guncelle, Adim 3'e geri don
 
 ## Zorunlu Kurallar
 
-### Kural 1: Her Kod Değişikliğinden Sonra Doğrula
-- Kod yazdıktan sonra **her zaman** uygun doğrulama komutunu çalıştır
-- Doğrulama olmadan hiçbir görevi tamamlanmış sayma
+### Kural 1: Her Kod Degisikliginden Sonra Dogrula
+- Kod yazdiktan sonra HER ZAMAN uygun dogrulama komutunu calistir
+- Dogrulama olmadan hicbir gorevi tamamlanmis sayma
 
-### Kural 2: Test Otomatik Algılama
-Proje yapısına göre doğru test/build komutunu seç:
-| Dosya/Proje Tipi | Doğrulama Komutu |
+### Kural 2: Test Otomatik Algilama
+Proje yapisina gore dogru test/build komutunu sec:
+| Dosya/Proje Tipi | Dogrulama Komutu |
 |---|---|
-| `package.json` var | `npm test` veya `npm run build` |
-| `.py` dosyası | `python <dosya>` veya `pytest` |
-| `Cargo.toml` var | `cargo build && cargo test` |
-| `.go` dosyası | `go build ./... && go test ./...` |
-| Tek HTML/JS | Browser'da aç, DOM + konsol kontrol |
-| JSX (bu proje) | `node --check <dosya>` syntax doğrulama |
+| package.json var | npm test veya npm run build |
+| .py dosyasi | python <dosya> veya pytest |
+| Cargo.toml var | cargo build && cargo test |
+| .go dosyasi | go build ./... && go test ./... |
+| Tek HTML/JS | Browser'da ac, DOM + konsol kontrol |
+| JSX (bu proje) | node --check <dosya> syntax dogrulama |
 
-### Kural 3: Hata Loglarını TAM Oku
-- Hata çıktısını **asla kırpma veya atlama** 
-- Tam stack trace, satır numaraları ve hata mesajlarını analiz et
-- `manage_task` → `status` ile arka plan görev loglarını kontrol et
+### Kural 3: Hata Loglarini TAM Oku
+- Hata ciktisini ASLA kirpma veya atlama
+- Tam stack trace, satir numaralari ve hata mesajlarini analiz et
+- manage_task -> status ile arka plan gorev loglarini kontrol et
 
-### Kural 4: Maksimum İterasyon Limiti
-- Aynı hata için en fazla **5 iterasyon** dene
-- 5 denemeden sonra hâlâ çözülemediyse:
-  - Denenen yaklaşımları özetle
-  - Root cause analizini paylaş
-  - Kullanıcıdan yönlendirme iste
+### Kural 4: Maksimum Iterasyon Limiti
+- Ayni hata icin en fazla 5 iterasyon dene
+- 5 denemeden sonra hala cozulemediyse:
+  - Denenen yaklasimlari ozetle
+  - Root cause analizini paylas
+  - Kullanicidan yonlendirme iste
 
-### Kural 5: Regresyon Koruması
-- Bir hatayı düzeltirken **başka bir şeyi bozma**
-- Her düzeltmeden sonra sadece kırılan testi değil, **tüm testleri** çalıştır
-- Önceki çalışan işlevselliği doğrula
+### Kural 5: Regresyon Korumasi
+- Bir hatayi duzeltirken baska bir seyi bozma
+- Her duzeltmeden sonra sadece kirilan testi degil, TUM TESTLERI calistir
+- Onceki calisan islevselligi dogrula
 
 ### Kural 6: Sessiz Geri Besleme
-- Loop çalışırken gereksiz açıklama yapma
-- Sadece hata ve düzeltme detaylarını kısa tut
-- Döngü başarıyla tamamlandığında sonucu raporla
+- Loop calisirken gereksiz aciklama yapma
+- Sadece hata ve duzeltme detaylarini kisa tut
+- Dongu basariyla tamamlandiginda sonucu raporla
 
-## Bu Projeye Özel Uygulama (Antigravity JSX)
+## Bu Projeye Ozel Uygulama (Antigravity JSX)
 
-Bu proje tek dosyalık bir JSX uygulaması olduğu için loop şöyle çalışır:
+Bu proje tek dosyalik bir JSX uygulamasi oldugu icin loop soyle calisir:
 
-1. **Kod Yaz** → `anti.1.0.x.jsx` dosyasını düzenle
-2. **Syntax Doğrula** → `node --check anti.1.0.x.jsx` (temel syntax)
-3. **Browser Test** → Dev server varsa konsol hatalarını kontrol et
-4. **Hata varsa** → Logları oku, düzelt, tekrar doğrula
-5. **Başarılı** → `app.js`'e kopyala, versiyon artır, git commit & push
+1. Kod Yaz -> anti.1.0.x.jsx dosyasini duzenle
+2. Syntax Dogrula -> node --check anti.1.0.x.jsx (temel syntax)
+3. Browser Test -> Dev server varsa konsol hatalarini kontrol et
+4. Hata varsa -> Loglari oku, duzelt, tekrar dogrula
+5. Basarili -> app.js'e kopyala, versiyon artir, git commit & push
 
 ## Aktivasyon
 
-Bu skill aşağıdaki durumlarda **otomatik** aktive olur:
-- Herhangi bir kod değişikliği yapıldığında
-- Bir bug fix talep edildiğinde
-- Yeni özellik eklendiğinde
-- Refactoring yapıldığında
-- Kullanıcı "loop", "döngü", "test et", "doğrula", "düzelt" dediğinde
+Bu skill asagidaki durumlarda OTOMATIK aktive olur:
+- Herhangi bir kod degisikligi yapildiginda
+- Bir bug fix talep edildiginde
+- Yeni ozellik eklendiginde
+- Refactoring yapildiginda
+- Kullanici loop, dongu, test et, dogrula, duzelt dediginde

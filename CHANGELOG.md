@@ -1,3 +1,8 @@
+﻿### v1.0.25 (2026-08-29)
+- **feat(core)**: \Jsx/qwen.txt\ kodu \nti.1.0.25.jsx\ ve \pp.js\ olarak entegre edildi; Firebase bağımlılıkları tamamen kaldırılarak %100 Local-First (SafeStorage + IndexedDB) mimarisi sağlandı.
+- **fix(render/fps)**: Instagram video yükleme ve oynatma reddine sebep olan FPS uyumsuzlukları kalıcı olarak giderildi (\captureStream(30)\ ve \TIMER_WORKER_INTERVAL_MS: 33\ ile kesintisiz sabit 30 FPS).
+- **fix(instagram)**: Instagram Reels & Post için WebM formatı reddedildiğinde \uploadMediaToCloud\ aşamasında otomatik ffmpeg.wasm MP4 (\libx264\ + \yuv420p\ + \ac\ + \-r 30\ + \+faststart\) dönüşümü zorunlu kılındı.
+- **fix(buffer)**: Buffer üzerinden Instagram paylaşımına \coverPhotoIndex: 0\ ve doğru video asset yapılandırması eklendi.
 ### v1.0.24 (2026-08-29)
 - **feat(skill)**: `loop-dongusu` skill oluşturuldu — kod → test → hata analizi → düzeltme → yeniden test self-correcting döngüsü otomatik uygulanır.
 - **feat(skill)**: Proje tipine göre otomatik test komutu algılama (npm, pytest, cargo, go, node --check).
