@@ -13,7 +13,9 @@ scratch/
 *.tmp
 *.mp4
 *.webm
+*.zip
 node_modules/
+omp-repo/
 dist/
 
 # OS & IDE

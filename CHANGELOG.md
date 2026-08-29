@@ -1,3 +1,8 @@
+### v1.0.24 (2026-08-29)
+- **feat(skill)**: `loop-dongusu` skill oluşturuldu — kod → test → hata analizi → düzeltme → yeniden test self-correcting döngüsü otomatik uygulanır.
+- **feat(skill)**: Proje tipine göre otomatik test komutu algılama (npm, pytest, cargo, go, node --check).
+- **feat(skill)**: Maksimum 5 iterasyon limiti, regresyon koruması ve tam hata log analizi zorunlu kılındı.
+
 ### v1.0.23 (2026-07-31)
 - **fix(download)**: 2 adet MP4 indirme sorunu tamamen giderildi — `_globalLastAutoDownloadedJobId` global kapsama taşındı, React re-render'larında duplikat indirme engellendi ve render başındaki otomatik `showSaveFilePicker` penceresi kapatıldı.
 - **fix(clickbait)**: Clickbait kapak başlığı KESİNLİKLE MAKSİMUM 3 KELİME ile sınırlandı — 4 veya daha fazla kelime olması engellendi (`words.slice(0, 3)` zorlaması tüm modlara uygulandı).
