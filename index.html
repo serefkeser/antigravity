@@ -139,6 +139,16 @@
   </script>
 
   <!-- OTONOM Ön-Derlenmiş Mobil Uygulama Paketi -->
-  <script src="./app.js?v=1.0.27"></script>
+  <script src="./app.js?v=1.0.28"></script>
+  <!-- Standalone / PWA React Mount -->
+  <script>
+    if (typeof window !== 'undefined' && window.App && typeof ReactDOM !== 'undefined') {
+      const rootEl = document.getElementById('root');
+      if (rootEl && !rootEl._reactRootContainer && !rootEl.__antiRoot) {
+        rootEl.__antiRoot = ReactDOM.createRoot(rootEl);
+        rootEl.__antiRoot.render(React.createElement(window.App));
+      }
+    }
+  </script>
 </body>
 </html>

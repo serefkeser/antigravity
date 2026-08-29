@@ -1,4 +1,6 @@
-﻿### v1.0.27 (2026-08-29)
+﻿### v1.0.28 (2026-08-29)
+- **fix(canvas/mount)**: Gemini Canvas için ReactDOMClient.createRoot() uyarısı tamamen çözüldü — Canvas React bileşenini (export default App) kendi içinde otomatik monte ettiği için dosya içindeki manuel createRoot kaldırıldı; standalone/PWA montajı index.html içerisine taşındı.
+### v1.0.27 (2026-08-29)
 - **fix(react/canvas)**: ReactDOMClient.createRoot() konsol uyarısı kalıcı olarak giderildi — DOM elementindeki __reactContainer$ ve _reactRootContainer anahtarları taranarak Gemini Canvas'ın otomatik mount işlemiyle çakışması önlendi.
 - **fix(log)**: Başlangıçtaki pasif müzik kontrolünde tekrarlanan "Müzik kütüphanesi boş. 'MÜZİK KLASÖRÜ SEÇ' butonundan bir kez ekleyin." uyarısı sessiz moda alındı.
 ### v1.0.26 (2026-08-29)
