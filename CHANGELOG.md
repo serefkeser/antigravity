@@ -1,4 +1,12 @@
-﻿### v1.0.28 (2026-08-29)
+﻿### v1.0.29 (2026-08-29)
+- **feat(duration/60s)**: Tam 60 saniyelik profesyonel gazete video akışı varsayılan hale getirildi (duration: '60').
+- **feat(prompt/flow)**: 60 saniyelik video akış mimarisi güçlendirildi:
+  1. **Clickbait Kanca (4-5 sn / 10-12 kelime):** Maksimum 3 kelime thumbnail başlığı + dramatik açılış kancası.
+  2. **Gazete Manşet & Detay Okuma (45-48 sn / 95-105 kelime):** Gazetedeki ana manşet ve can alıcı detay haberlerin 5N1K formatında akıcı, tempolu okunması (sabit ilk sayfa görseliyle).
+  3. **Son Söz (4-5 sn / 10-12 kelime):** Habere cuk oturan düşündürücü atasözü / özlü söz.
+  4. **Outro (3-4 sn / 6-8 kelime):** Abone ve takip çağrısı.
+- **tuning(render)**: getDurationBounds ve kelime sınırları (~120-135 kelime) ile tam 60 saniyelik hassas zamanlama garantilendi.
+### v1.0.28 (2026-08-29)
 - **fix(canvas/mount)**: Gemini Canvas için ReactDOMClient.createRoot() uyarısı tamamen çözüldü — Canvas React bileşenini (export default App) kendi içinde otomatik monte ettiği için dosya içindeki manuel createRoot kaldırıldı; standalone/PWA montajı index.html içerisine taşındı.
 ### v1.0.27 (2026-08-29)
 - **fix(react/canvas)**: ReactDOMClient.createRoot() konsol uyarısı kalıcı olarak giderildi — DOM elementindeki __reactContainer$ ve _reactRootContainer anahtarları taranarak Gemini Canvas'ın otomatik mount işlemiyle çakışması önlendi.
