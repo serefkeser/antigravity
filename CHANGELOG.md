@@ -1,4 +1,7 @@
-﻿### v1.0.26 (2026-08-29)
+﻿### v1.0.27 (2026-08-29)
+- **fix(react/canvas)**: ReactDOMClient.createRoot() konsol uyarısı kalıcı olarak giderildi — DOM elementindeki __reactContainer$ ve _reactRootContainer anahtarları taranarak Gemini Canvas'ın otomatik mount işlemiyle çakışması önlendi.
+- **fix(log)**: Başlangıçtaki pasif müzik kontrolünde tekrarlanan "Müzik kütüphanesi boş. 'MÜZİK KLASÖRÜ SEÇ' butonundan bir kez ekleyin." uyarısı sessiz moda alındı.
+### v1.0.26 (2026-08-29)
 - **fix(canvas/esbuild)**: Gemini Canvas'ta esbuild derlemesini engelleyen Multiple exports with the same name "default" hatası kalıcı olarak düzeltildi (App fonksiyonu standart bildirim yapılıp tek export default App sağlandı).
 - **verify(esbuild)**: nti.1.0.26.jsx esbuild ile yerel olarak derlenip %100 sıfır hata ile doğrulandı.
 ### v1.0.25 (2026-08-29)
