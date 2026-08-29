@@ -1,4 +1,7 @@
-﻿### v1.0.29 (2026-08-29)
+﻿### v1.0.30 (2026-08-29)
+- **feat(music/gdrive)**: Verilen Google Drive klasöründen (\19bbiNUvhdq5FyCdPYDsfVEN7RpFajJMY\) **148 adet müzik parçası** otomatik olarak çekildi ve sisteme entegre edildi.
+- **feat(music/cache)**: \GDRIVE_CLOUD_MUSIC_CATALOG\ ve \AssetManagerService.getMusicFromLib\ mimarisi ile parçalar talep anında doğrudan Google Drive / proxy üzerinden indirilip IndexedDB'ye önbelleğe alınır; kullanıcı müdahalesi gerektirmeden hazır çalışır.
+### v1.0.29 (2026-08-29)
 - **feat(duration/60s)**: Tam 60 saniyelik profesyonel gazete video akışı varsayılan hale getirildi (duration: '60').
 - **feat(prompt/flow)**: 60 saniyelik video akış mimarisi güçlendirildi:
   1. **Clickbait Kanca (4-5 sn / 10-12 kelime):** Maksimum 3 kelime thumbnail başlığı + dramatik açılış kancası.
