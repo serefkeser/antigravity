@@ -1,4 +1,7 @@
-﻿### v1.0.25 (2026-08-29)
+﻿### v1.0.26 (2026-08-29)
+- **fix(canvas/esbuild)**: Gemini Canvas'ta esbuild derlemesini engelleyen Multiple exports with the same name "default" hatası kalıcı olarak düzeltildi (App fonksiyonu standart bildirim yapılıp tek export default App sağlandı).
+- **verify(esbuild)**: nti.1.0.26.jsx esbuild ile yerel olarak derlenip %100 sıfır hata ile doğrulandı.
+### v1.0.25 (2026-08-29)
 - **feat(core)**: \Jsx/qwen.txt\ kodu \nti.1.0.25.jsx\ ve \pp.js\ olarak entegre edildi; Firebase bağımlılıkları tamamen kaldırılarak %100 Local-First (SafeStorage + IndexedDB) mimarisi sağlandı.
 - **fix(render/fps)**: Instagram video yükleme ve oynatma reddine sebep olan FPS uyumsuzlukları kalıcı olarak giderildi (\captureStream(30)\ ve \TIMER_WORKER_INTERVAL_MS: 33\ ile kesintisiz sabit 30 FPS).
 - **fix(instagram)**: Instagram Reels & Post için WebM formatı reddedildiğinde \uploadMediaToCloud\ aşamasında otomatik ffmpeg.wasm MP4 (\libx264\ + \yuv420p\ + \ac\ + \-r 30\ + \+faststart\) dönüşümü zorunlu kılındı.
