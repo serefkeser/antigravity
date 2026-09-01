@@ -54,11 +54,16 @@
         return r.text();
       })
       .then(src => {
-        // Remove ALL import lines (multiline safe)
-        let code = src
-          .replace(/^import\b[^;]*;?\s*\n?/gm, '')
-          .replace(/^export\s+default\s+\w+;?\s*\n?/gm, '')
-          .replace(/^export\s+\{[^}]*\};?\s*\n?/gm, '');
+        // Line-by-line filter: remove import/export lines reliably
+        const lines = src.split('\n');
+        const filtered = lines.filter(line => {
+          const t = line.trim();
+          if (t.startsWith('import ') || t.startsWith('import{')) return false;
+          if (t.startsWith('export default ') || t === 'export default App;') return false;
+          if (t.startsWith('export {') || t.startsWith('export{')) return false;
+          return true;
+        });
+        let code = filtered.join('\n');
 
         // Inject React hooks into scope (replaces stripped import)
         const reactGlobals = `const { useState, useRef, useEffect, useCallback, useMemo, useReducer, createContext, useContext, forwardRef, memo, Fragment, Component } = React;\n`;
