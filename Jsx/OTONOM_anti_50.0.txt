@@ -82,7 +82,7 @@ const { Download, RotateCcw, UploadCloud, Music, Trash2, Volume2, Clock, Loader2
 // M1: CONSTANTS & CONFIG
 // ============================================================================
 const APP_VERSION = {
-  major: 1, minor: 40, hotfix: 'H1.40',
+  major: 1, minor: 41, hotfix: 'H1.41',
   toString() { return `anti ${this.major}.0.${this.minor}`; },
   toBadge() { return `${this.toString()} • One-Page`; }
 };
@@ -4133,7 +4133,7 @@ function App() {
       return { name, ...variants, fullCandidates: [...variants.fullCandidates, placeholder], thumbCandidates: [...variants.thumbCandidates, placeholder], fullSrc: variants.fullCandidates[0] || placeholder, thumbSrc: variants.thumbCandidates[0] || placeholder, resolvedFull: cached?.full || '', resolvedThumb: cached?.thumb || '', sources: meta.ayd ? ['Aydınlık CDN'] : [], loaded: false, placeholder, revision: 0 };
     });
   };
-  const fetchWithGazeteTimeout = async (url, externalSignal, timeoutMs = 6500) => {
+  const fetchWithGazeteTimeout = async (url, externalSignal, timeoutMs = 7000) => {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
     const abortFromParent = () => controller.abort();
@@ -4144,17 +4144,24 @@ function App() {
   const fetchGazeteSourceTextsFast = async (pageUrl, signal, cacheBust = '') => {
     const freshPageUrl = appendGazeteCacheBust(pageUrl, cacheBust);
     const target = freshPageUrl.replace(/^https?:\/\//, '');
+    const isLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
     const proxyUrls = [
-      `https://api.allorigins.win/raw?url=${encodeURIComponent(freshPageUrl)}`,
-      `https://r.jina.ai/https://${target}`,
+      ...(isLocal ? [`http://localhost:3000/proxy?url=${encodeURIComponent(freshPageUrl)}`, `http://127.0.0.1:3000/proxy?url=${encodeURIComponent(freshPageUrl)}`] : []),
+      `https://api.allorigins.win/get?url=${encodeURIComponent(freshPageUrl)}`,
       `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(freshPageUrl)}`,
-      `https://corsproxy.io/?${encodeURIComponent(freshPageUrl)}`
+      `https://corsproxy.io/?${encodeURIComponent(freshPageUrl)}`,
+      `https://r.jina.ai/https://${target}`
     ];
     const jobs = proxyUrls.map(async proxyUrl => {
-      const response = await fetchWithGazeteTimeout(proxyUrl, signal, 6500);
+      const response = await fetchWithGazeteTimeout(proxyUrl, signal, 7500);
       if (!response.ok) throw new Error(String(response.status));
       const contentType = (response.headers.get('content-type') || '').toLowerCase();
-      if (contentType.includes('json')) { const json = await response.json(); const body = json?.contents || json?.data || json?.body || ''; if (typeof body !== 'string' || body.length < 200) throw new Error('empty'); return body; }
+      if (contentType.includes('json') || proxyUrl.includes('allorigins.win/get')) {
+        const json = await response.json();
+        const body = json?.contents || json?.data || json?.body || '';
+        if (typeof body !== 'string' || body.length < 200) throw new Error('empty');
+        return body;
+      }
       const body = await response.text(); if (body.length < 200) throw new Error('empty'); return body;
     });
     const settled = await Promise.allSettled(jobs);
@@ -4169,7 +4176,7 @@ function App() {
       if (forcedName && contextName && contextName !== forcedName) return;
       seen.add(src);
       const contextBoost = forcedName && contextName === forcedName ? 45 : 0;
-      out.push({ name: forcedName || meta.name || '', src, source: sourceLabel, alt: meta.alt || '', title: meta.title || '', hint: meta.hint || '', score: (meta.score || 10) + contextBoost });
+      out.push({ name: forcedName || meta.name || contextName || '', src, source: sourceLabel, alt: meta.alt || '', title: meta.title || '', hint: meta.hint || '', score: (meta.score || 10) + contextBoost });
     };
     try {
       const doc = new DOMParser().parseFromString(text, 'text/html');
@@ -4208,15 +4215,24 @@ function App() {
   };
   const fetchIndividualGazeteCandidates = async (name, selectedDate, signal, cacheBust = '') => {
     const meta = GAZETE_META[name] || {}; const candidates = []; const jobs = [];
-    if (meta.gzt) jobs.push((async () => {
-      const indexUrl = `https://gazetemanset.gzt.com/${meta.gzt}`;
-      const indexTexts = await fetchGazeteSourceTextsFast(indexUrl, signal, cacheBust);
-      const details = [];
-      for (const body of indexTexts) for (const detail of extractGztDetailUrls(body, meta.gzt, selectedDate)) if (!details.includes(detail)) details.push(detail);
-      const detailCandidates = uniqueGazeteUrls([...details, ...extractGztDetailUrls('', meta.gzt, selectedDate)]);
-      const detailJobs = detailCandidates.map(async detailUrl => { const texts = await fetchGazeteSourceTextsFast(detailUrl, signal, cacheBust); for (const body of texts) candidates.push(...extractGazeteCandidates(body, detailUrl, 'GZT', name)); });
-      await Promise.allSettled(detailJobs);
-    })());
+    if (meta.go) {
+      jobs.push((async () => {
+        const detailUrl = `https://www.gazeteoku.com/gazeteler/${meta.go}`;
+        const texts = await fetchGazeteSourceTextsFast(detailUrl, signal, cacheBust);
+        for (const body of texts) candidates.push(...extractGazeteCandidates(body, detailUrl, 'GazeteOku', name));
+      })());
+    }
+    if (meta.gzt) {
+      jobs.push((async () => {
+        const indexUrl = `https://gazetemanset.gzt.com/${meta.gzt}`;
+        const indexTexts = await fetchGazeteSourceTextsFast(indexUrl, signal, cacheBust);
+        const details = [];
+        for (const body of indexTexts) for (const detail of extractGztDetailUrls(body, meta.gzt, selectedDate)) if (!details.includes(detail)) details.push(detail);
+        const detailCandidates = uniqueGazeteUrls([...details, ...extractGztDetailUrls('', meta.gzt, selectedDate)]);
+        const detailJobs = detailCandidates.map(async detailUrl => { const texts = await fetchGazeteSourceTextsFast(detailUrl, signal, cacheBust); for (const body of texts) candidates.push(...extractGazeteCandidates(body, detailUrl, 'GZT', name)); });
+        await Promise.allSettled(detailJobs);
+      })());
+    }
     await Promise.allSettled(jobs);
     const seen = new Set();
     return candidates.filter(candidate => { if (!candidate.src || seen.has(candidate.src)) return false; seen.add(candidate.src); return true; }).sort((a, b) => (b.score || 0) - (a.score || 0));
@@ -4273,13 +4289,31 @@ function App() {
       clearGazeteCacheForDate(selectedDate);
       const cards = buildGazeteCards(selectedDate, refreshToken);
       setGazeteItems(cards);
-      setGazeteLoading(false);
-      addSystemLog(`✓ ${cards.length}/30 gazete kartı anında oluşturuldu.`, 'success');
-      // Sunucu tarafı "canlı kaynak" iyileştirmesi TAMAMEN OPSİYONELDİR.
-      // Bir backend (API_BASE_URL / aynı origin) yoksa bu adım sessizce
-      // atlanır; 30 kart zaten yukarıda tamamen yerel olarak (GAZETE_URL_MAP +
-      // CORS_PROXIES + otomatik "rescue") üretildi ve resim yüklenemezse
-      // handleGazeteImageError otomatik alternatif kaynağa geçer.
+      addSystemLog(`✓ ${cards.length}/30 gazete kartı hazırlandı, canlı manşetler taranıyor...`, 'info');
+
+      // 1. ADIM: GazeteOku ana dizinini tek seferde tara
+      try {
+        const listTexts = await fetchGazeteSourceTextsFast('https://www.gazeteoku.com/gazeteler', controller.signal, refreshToken);
+        if (listTexts.length > 0 && requestId === gazeteRequestIdRef.current && !controller.signal.aborted) {
+          const foundMap = new Map();
+          for (const html of listTexts) {
+            const extracted = extractGazeteCandidates(html, 'https://www.gazeteoku.com/gazeteler', 'GazeteOku');
+            for (const cand of extracted) {
+              if (cand.name && !foundMap.has(cand.name)) {
+                foundMap.set(cand.name, [cand]);
+              }
+            }
+          }
+          if (foundMap.size > 0) {
+            setGazeteItems(prev => prev.map(item => {
+              return foundMap.has(item.name) ? prependLiveGazeteCandidates(item, foundMap.get(item.name), refreshToken) : item;
+            }));
+            addSystemLog(`✓ GazeteOku: ${foundMap.size} ulusal gazete manşeti canlı olarak getirildi.`, 'success');
+          }
+        }
+      } catch (eList) { ErrorHandler.silent(eList); }
+
+      // 2. ADIM: Sunucu endpoint'i varsa (opsiyonel)
       try {
         const serverPayload = await fetchServerGazeteCandidates(selectedDate, controller.signal, refreshToken);
         if (requestId !== gazeteRequestIdRef.current || controller.signal.aborted) return;
@@ -4291,13 +4325,13 @@ function App() {
           const diagnosed = { ...item, diagnostic: diagnosticMap.get(item.name) || null };
           return found.has(item.name) ? prependLiveGazeteCandidates(diagnosed, found.get(item.name), refreshToken) : diagnosed;
         }));
-        const sourceSummary = (serverPayload.sourceStats || []).map(source => `${source.name}: ${source.listedTotal} listeli / ${source.imagesFound} görsel`).join(' · ');
-        if (sourceSummary) addSystemLog(`Kaynak sayımı · ${sourceSummary}`, 'info');
-        addSystemLog(`✓ Ulusal manşetler: ${serverPayload.summary?.imported ?? found.size}/30 bulundu, ${serverPayload.summary?.missing ?? (30 - found.size)} eksik.`, found.size ? 'success' : 'warn');
+        addSystemLog(`✓ Sunucu manşetleri: ${serverPayload.summary?.imported ?? found.size}/30 bulundu.`, found.size ? 'success' : 'warn');
       } catch (serverErr) {
-        if (serverErr?.name !== 'AbortError') addSystemLog('Sunucu iyileştirmesi atlandı (localde çalışılıyor): ' + (serverErr?.message || serverErr), 'info');
+        if (serverErr?.name !== 'AbortError') ErrorHandler.silent(serverErr);
       }
     } catch (e) { if (e?.name !== 'AbortError') { setGazeteError('Gazete manşetleri hazırlanırken hata oluştu.'); addSystemLog('Gazete yükleme hatası: ' + (e?.message || e), 'error'); } }
+    finally { if (requestId === gazeteRequestIdRef.current) setGazeteLoading(false); }
+  };
     finally { if (requestId === gazeteRequestIdRef.current) setGazeteLoading(false); }
   };
   const handleGazeteImageError = (event, item, kind = 'thumb') => {
