@@ -60,6 +60,10 @@
           .replace(/^export\s+default\s+\w+;?\s*\n?/gm, '')
           .replace(/^export\s+\{[^}]*\};?\s*\n?/gm, '');
 
+        // Inject React hooks into scope (replaces stripped import)
+        const reactGlobals = `const { useState, useRef, useEffect, useCallback, useMemo, useReducer, createContext, useContext, forwardRef, memo, Fragment, Component } = React;\n`;
+        code = reactGlobals + code;
+
         // Append render + hide loading
         code += `
 ;(function(){
