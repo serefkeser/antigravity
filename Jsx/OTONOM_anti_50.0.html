@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>OTONOM 1.0 UI</title>
+<style>
+  body {font-family: 'Inter', sans-serif; background:#1e1e1e; color:#e0e0e0; margin:0; padding:0; display:flex; flex-direction:column; height:100vh;}
+  header {background: linear-gradient(135deg,#ff7e5f,#feb47b); padding:1rem; text-align:center; font-size:1.5rem; color:#fff;}
+  main {flex:1; overflow:auto; padding:2rem;}
+  pre {background:#2d2d2d; padding:1rem; border-radius:8px; overflow:auto; white-space:pre-wrap; word-wrap:break-word;}
+  a {color:#66d9ef; text-decoration:none;}
+  a:hover {text-decoration:underline;}
+</style>
+</head>
+<body>
+<header>OTONOM 1.0 – Dinamik Görüntüleme</header>
+<main>
+  <pre id="content">Yükleniyor...</pre>
+</main>
+<script>
+  fetch('OTONOM_anti_50.0.txt')
+    .then(r=> r.ok ? r.text() : Promise.reject('Dosya bulunamadı'))
+    .then(txt => { document.getElementById('content').textContent = txt; })
+    .catch(err => { document.getElementById('content').textContent = 'Error: ' + err; });
+</script>
+</body>
+</html>
