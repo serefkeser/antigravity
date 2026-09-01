@@ -83,7 +83,8 @@
         // Transpile with Babel and eval
         try {
           const transpiled = Babel.transform(code, {
-            presets: ['react'],
+            presets: [['react', { runtime: 'classic' }]],
+            sourceType: 'script',
             filename: 'app.jsx'
           }).code;
           // eslint-disable-next-line no-new-func
