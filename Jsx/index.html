@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>OTONOM anti 1.0.39</title>
+  <title>OTONOM anti 1.0.40</title>
   <meta name="description" content="OTONOM – AI destekli video üretim platformu. Gemini Canvas uyumlu, local-first." />
 
   <!-- Tailwind CSS -->
@@ -40,7 +40,7 @@
   <div id="loading-screen">
     <div class="spinner"></div>
     <p>OTONOM yükleniyor…</p>
-    <div class="version">anti 1.0.39 • One-Page</div>
+    <div class="version">anti 1.0.40 • One-Page</div>
   </div>
 
   <!-- React Root -->
@@ -48,7 +48,7 @@
 
   <!-- App Loader -->
   <script>
-    fetch('OTONOM_anti_50.0.txt')
+    fetch('OTONOM_anti_50.0.txt?t=' + Date.now())
       .then(r => {
         if (!r.ok) throw new Error('Dosya yüklenemedi: ' + r.status);
         return r.text();

@@ -82,7 +82,7 @@ const { Download, RotateCcw, UploadCloud, Music, Trash2, Volume2, Clock, Loader2
 // M1: CONSTANTS & CONFIG
 // ============================================================================
 const APP_VERSION = {
-  major: 1, minor: 39, hotfix: 'H1.39',
+  major: 1, minor: 40, hotfix: 'H1.40',
   toString() { return `anti ${this.major}.0.${this.minor}`; },
   toBadge() { return `${this.toString()} • One-Page`; }
 };
@@ -4432,9 +4432,8 @@ function App() {
                 </div>
               </div>
               <div className="flex gap-2 shrink-0 relative z-10">
-                {(prefs.ambientSound && !['none', 'rain', 'wind', 'waves', 'fire'].includes(prefs.ambientSound)) && <button onClick={deleteMusic} className="bg-rose-500/20 hover:bg-rose-500/40 text-rose-500 p-2 rounded-lg transition"><Trash2 size={16} /></button>}
-                <a href={DRIVE_MUSIC_FOLDER_URL} target="_blank" rel="noreferrer" className="bg-violet-600 hover:bg-violet-500 text-white px-3 md:px-4 py-2 rounded-lg text-xs font-bold cursor-pointer transition whitespace-nowrap">DRIVE KLASÖRÜ</a>
-                <input ref={musicFileInputRef} type="file" webkitdirectory="true" multiple accept="audio/*,.mp3,.wav,.ogg,.flac,.m4a,.aac,.wma" className="hidden" onChange={handleFolderSelectLegacy} />
+                <button type="button" onClick={handleFolderSelect} className="bg-violet-600 hover:bg-violet-500 text-white px-3 md:px-4 py-2 rounded-lg text-xs font-bold cursor-pointer transition whitespace-nowrap flex items-center gap-1.5"><Music size={14} /> KLASÖR SEÇ</button>
+                <input ref={musicFileInputRef} type="file" webkitdirectory="true" directory="" multiple accept="audio/*,.mp3,.wav,.ogg,.flac,.m4a,.aac,.wma" className="hidden" onChange={handleFolderSelectLegacy} />
               </div>
             </div>
             {studioMedia.musicList.length > 0 && (
